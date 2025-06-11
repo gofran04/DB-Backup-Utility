@@ -29,7 +29,7 @@ class DatabaseConnectionController extends Controller
 
     public function show(DatabaseConnection $databaseConnection)
     {
-        //
+        return new DatabaseConnectionResource($databaseConnection);
     }
 
     public function update(UpdateDatabaseConnectionRequest $request, DatabaseConnection $databaseConnection)
