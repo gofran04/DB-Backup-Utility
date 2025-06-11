@@ -13,7 +13,9 @@ class DatabaseConnectionController extends Controller
 {
     public function index()
     {
-        //
+        $db_connections = DatabaseConnection::all(); // You can use pagination if needed
+
+        return DatabaseConnectionResource::collection($db_connections);
     }
 
     public function store(StoreDatabaseConnectionRequest $request)
