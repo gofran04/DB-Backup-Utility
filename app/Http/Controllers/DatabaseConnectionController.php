@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreDatabaseConnectionRequest;
+use App\Http\Requests\CreateOrUpdateDatabaseConnectionRequest;
 use App\Http\Requests\UpdateDatabaseConnectionRequest;
 use App\Models\DatabaseConnection;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +18,7 @@ class DatabaseConnectionController extends Controller
         return DatabaseConnectionResource::collection($db_connections);
     }
 
-    public function store(StoreDatabaseConnectionRequest $request)
+    public function store(CreateOrUpdateDatabaseConnectionRequest $request)
     {
         $db_connection = DatabaseConnection::create($request->validated());
 
@@ -32,9 +32,13 @@ class DatabaseConnectionController extends Controller
         return new DatabaseConnectionResource($databaseConnection);
     }
 
-    public function update(UpdateDatabaseConnectionRequest $request, DatabaseConnection $databaseConnection)
+    public function update(CreateOrUpdateDatabaseConnectionRequest $request, DatabaseConnection $databaseConnection)
     {
-        //
+        $databaseConnection->update($request->validated());
+
+        return (new DatabaseConnectionResource($databaseConnection->refresh()))
+                ->response()
+                ->setStatusCode(Response::HTTP_ACCEPTED);
     }
 
     public function destroy(DatabaseConnection $databaseConnection)
