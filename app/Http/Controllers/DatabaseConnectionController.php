@@ -2,65 +2,48 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreDatabaseConnectionRequest;
+use App\Http\Requests\CreateOrUpdateDatabaseConnectionRequest;
 use App\Http\Requests\UpdateDatabaseConnectionRequest;
 use App\Models\DatabaseConnection;
+use Symfony\Component\HttpFoundation\Response;
+use App\Http\Resources\DatabaseConnectionResource;
+
 
 class DatabaseConnectionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $db_connections = DatabaseConnection::all(); // You can use pagination if needed
+
+        return DatabaseConnectionResource::collection($db_connections);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(CreateOrUpdateDatabaseConnectionRequest $request)
     {
-        //
+        $db_connection = DatabaseConnection::create($request->validated());
+
+        return (new DatabaseConnectionResource($db_connection))
+                ->response()
+                ->setStatusCode(Response::HTTP_CREATED);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreDatabaseConnectionRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(DatabaseConnection $databaseConnection)
     {
-        //
+        return new DatabaseConnectionResource($databaseConnection);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(DatabaseConnection $databaseConnection)
+    public function update(CreateOrUpdateDatabaseConnectionRequest $request, DatabaseConnection $databaseConnection)
     {
-        //
+        $databaseConnection->update($request->validated());
+
+        return (new DatabaseConnectionResource($databaseConnection->refresh()))
+                ->response()
+                ->setStatusCode(Response::HTTP_ACCEPTED);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateDatabaseConnectionRequest $request, DatabaseConnection $databaseConnection)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(DatabaseConnection $databaseConnection)
     {
-        //
+        $databaseConnection->delete();
+        return response('The DB Connection has been deleted');
     }
 }
