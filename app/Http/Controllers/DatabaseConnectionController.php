@@ -43,6 +43,7 @@ class DatabaseConnectionController extends Controller
 
     public function destroy(DatabaseConnection $databaseConnection)
     {
-        //
+        $databaseConnection->delete();
+        return response('The DB Connection has been deleted');
     }
 }
