@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreDatabaseConnectionRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class StoreDatabaseConnectionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +23,13 @@ class StoreDatabaseConnectionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'connection_name' => 'required|string',
+            'type'            => ['required',Rule::in(['mysql', 'postgresql'])],
+            'host'            => 'required|string',
+            'port'            => 'required|integer',
+            'db_name'         => 'required|string',
+            'username'        => 'required|string',
+            'password'        => 'required|string',
         ];
     }
 }
