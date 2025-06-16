@@ -49,18 +49,9 @@ class DatabaseConnectionController extends Controller
         return response('The DB Connection has been deleted');
     }
 
-    public function testa() 
+    public function testConnection() 
     {
         $connection = DatabaseConnection::find(1);
-
-        // $arr = [
-        //     'driver' => 'mysql',
-        //     'host' => $connection->host,
-        //     'port' => $connection->port , 
-        //     'database' => $connection->db_name,
-        //     'username' => $connection->username,
-        //     'password' => Crypt::decrypt($connection->password),
-        // ];
 
         $connectionName = 'temp_' . uniqid();
         DB::purge($connectionName); // Ensure it's clean
@@ -72,11 +63,11 @@ class DatabaseConnectionController extends Controller
             'database' => $connection->db_name,
             'username' => $connection->username,
             'password' => $connection->password,
-            // 'charset' => 'utf8mb4',
-            // 'collation' => 'utf8mb4_unicode_ci',
-            // 'prefix' => '',
-            // 'strict' => true,
-            // 'engine' => null,
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
          ]);
 
         DB::reconnect($connectionName);
