@@ -79,7 +79,7 @@ class BackupJobController extends Controller
 
     public function show(BackupJob $backupJob)
     {
-        //
+        return new BackupJobResource($backupJob);
     }
 
     public function update(UpdateBackupJobRequest $request, BackupJob $backupJob)
