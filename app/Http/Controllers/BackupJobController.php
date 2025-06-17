@@ -8,12 +8,15 @@ use App\Models\BackupJob;
 use App\Services\DatabaseBackupService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
+use App\Http\Resources\BackupJobResource;
 
 class BackupJobController extends Controller
 {
     public function index()
     {
-        //
+        $backup_jobs = BackupJob::all();
+
+        return BackupJobResource::collection($backup_jobs);
     }
 
     public function store(StoreBackupJobRequest $request)
