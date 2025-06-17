@@ -82,11 +82,6 @@ class BackupJobController extends Controller
         return new BackupJobResource($backupJob);
     }
 
-    public function update(UpdateBackupJobRequest $request, BackupJob $backupJob)
-    {
-        //
-    }
-
     public function destroy(BackupJob $backupJob)
     {
         $backupJob->delete();

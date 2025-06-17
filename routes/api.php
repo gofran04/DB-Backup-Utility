@@ -7,7 +7,7 @@ use App\Http\Controllers\BackupJobController;
 
 Route::get('database-connections/test',[DatabaseConnectionController::class, 'testConnection']);
 Route::apiResource('database-connections',DatabaseConnectionController::class);
-Route::apiResource('backup-jobs',BackupJobController::class);
+Route::apiResource('backup-jobs',BackupJobController::class)->except(['update']);
 
 
 
