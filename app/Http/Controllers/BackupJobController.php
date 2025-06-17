@@ -89,6 +89,7 @@ class BackupJobController extends Controller
 
     public function destroy(BackupJob $backupJob)
     {
-        //
+        $backupJob->delete();
+        return response('The Backup Job has been deleted');
     }
 }
