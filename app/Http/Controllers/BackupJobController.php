@@ -9,6 +9,8 @@ use App\Services\DatabaseBackupService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use App\Http\Resources\BackupJobResource;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class BackupJobController extends Controller
 {
@@ -55,7 +57,7 @@ class BackupJobController extends Controller
 
         // Run backup via backup service
         try {
-            $result = DatabaseBackupService::backup($connectionName,'/app/backups');
+            $result = DatabaseBackupService::backup($connectionName,'backups');
            
             // Update job record with success
             $backupJob->update([
@@ -84,7 +86,30 @@ class BackupJobController extends Controller
 
     public function destroy(BackupJob $backupJob)
     {
+        $relativePath = trim($backupJob->backup_path);
+        $fullPath = storage_path('app/' . $relativePath);
+
+        $fileWasThere = file_exists($fullPath); // ← Check BEFORE deleting
+        if ($fileWasThere) 
+        {
+            if (!@unlink($fullPath)) {
+                Log::error("Failed to delete backup file: {$fullPath}");
+
+                return response()->json([
+                    'message'   => 'Failed to delete the backup file from disk.',
+                    'file_path' => $relativePath,
+                ], 500);
+            }
+        } else {
+            Log::warning("Backup file not found during delete: {$fullPath}");
+        }
+
         $backupJob->delete();
-        return response('The Backup Job has been deleted');
+
+        return response()->json([
+            'message' => $fileWasThere
+                ? 'Backup file and record deleted successfully.'
+                : 'Backup record deleted. File was already missing.',
+        ]);
     }
 }
