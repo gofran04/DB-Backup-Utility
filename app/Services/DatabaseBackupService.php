@@ -15,9 +15,9 @@ class DatabaseBackupService
         // File name format like: client_db_backup_20250613_162510.sql
         $filename = "{$config['database']}_backup_" . date('Ymd_His') . ".sql";
         $relativePath = "{$outputPath}/{$filename}";
-        $fullPath = storage_path($relativePath);
+        $fullPath = storage_path('app/' . $relativePath);
 
-        // Build mysqldump command
+        // Build mysqldump command to output to stdout (no `> file`)
         $command = sprintf(
             'mysqldump --user=%s --password=%s --host=%s --port=%s %s > %s 2>&1',
             escapeshellarg($config['username']),
@@ -28,20 +28,20 @@ class DatabaseBackupService
             escapeshellarg($fullPath)
         );
 
-        // Execute it ($command)
-        $result = null;
+         // Run command
         $output = [];
+        $result = null;
         exec($command, $output, $result);
 
-        // wait 100 ms.to fully writing the file to avoid getting wronge size
-        usleep(100000); 
+        // Check if file was created and has content(avvoid getting size = 0)
+        $fileSize = file_exists($fullPath) ? filesize($fullPath) : 0;
 
         // Success
-        if ($result === 0 && file_exists($fullPath)) {
+        if ($result === 0 && $fileSize > 0) {
             return [
-                'status'    => true,
-                'file_path' => $fullPath,
-                'file_size' => filesize($fullPath),
+                'status'          => true,
+                'file_path'       => $relativePath,
+                'file_size'       => $fileSize,
             ];
         }
 

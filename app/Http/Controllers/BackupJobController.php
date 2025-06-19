@@ -9,6 +9,8 @@ use App\Services\DatabaseBackupService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use App\Http\Resources\BackupJobResource;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class BackupJobController extends Controller
 {
@@ -55,7 +57,7 @@ class BackupJobController extends Controller
 
         // Run backup via backup service
         try {
-            $result = DatabaseBackupService::backup($connectionName,'/app/backups');
+            $result = DatabaseBackupService::backup($connectionName,'backups');
            
             // Update job record with success
             $backupJob->update([
