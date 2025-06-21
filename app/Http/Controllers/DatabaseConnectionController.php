@@ -49,42 +49,40 @@ class DatabaseConnectionController extends Controller
         return response('The DB Connection has been deleted');
     }
 
-    public function testConnection() 
+    public function testConnection($db_id) 
     {
-        $connection = DatabaseConnection::find(1);
-
+        $databaseConnection = DatabaseConnection::findOrFail($db_id);
+    
         $connectionName = 'temp_' . uniqid();
         DB::purge($connectionName); // Ensure it's clean
 
         Config::set("database.connections.{$connectionName}", [
-            'driver' => 'mysql',
-            'host' => $connection->host,
-            'port' => $connection->port,
-            'database' => $connection->db_name,
-            'username' => $connection->username,
-            'password' => $connection->password,
-            'charset' => 'utf8mb4',
+            'driver'    => 'mysql',
+            'host'      => $databaseConnection->host,
+            'port'      => $databaseConnection->port,
+            'database'  => $databaseConnection->db_name,
+            'username'  => $databaseConnection->username,
+            'password'  => $databaseConnection->password,
+            'charset'   => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-            'strict' => true,
-            'engine' => null,
+            'prefix'    => '',
+            'strict'    => true,
+            'engine'    => null,
          ]);
-
-        DB::reconnect($connectionName);
 
         //  Test it
         try {
             DB::connection($connectionName)->getPdo();
-            echo " Connected to DB";
-
-            $roles = DB::connection($connectionName)->table('roles')->limit(10)->get();
-
-            foreach ($roles as $role) {
-                echo $role->id . ' - ' . $role->name . PHP_EOL;
-            }
+            return response()->json([
+                    'message' => 'Connected to database',
+                ], 200 );
         } catch (\Exception $e) {
-            echo " Connection failed: " . $e->getMessage();
+            return response()->json([
+                'message' => 'Failed to connect to database',
+            ], 422);
+        } finally { // clean up DB connection 
+            DB::disconnect($connectionName);
+            DB::purge($connectionName);
         }
-
     }
 }
