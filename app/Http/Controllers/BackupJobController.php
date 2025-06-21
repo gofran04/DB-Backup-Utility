@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\DatabaseConnectionController;
 use App\Models\DatabaseConnection;
+use App\Exceptions\DatabaseConnectionException;
 
 class BackupJobController extends Controller
 {
@@ -34,12 +35,20 @@ class BackupJobController extends Controller
         ]);
 
         // Test DB Connection
-        $result = DatabaseConnectionController::createDynamicConnection($input['db_id']);
-        if (! $result['status']) 
-        {
+        try {
+            $result = DatabaseConnectionController::createDynamicConnection($input['db_id']);
+            if (! $result['status']) 
+            {
+                return response()->json([
+                    'message' => 'Database connection failed before backup opeartion start.',
+                    'error'   => $result['error'],
+                ], 422);
+            }
+        }catch(DatabaseConnectionException $e){
             return response()->json([
-                'message' => 'Database connection failed before backup opeartion start.',
-                'error'   => $result['error'],
+                'message'       => 'Database connection failed',
+                'error_type'    => $e->getType(),
+                'error_message' => $e->getMessage(),
             ], 422);
         }
        

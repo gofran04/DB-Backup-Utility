@@ -10,6 +10,7 @@ use App\Http\Resources\DatabaseConnectionResource;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
+use App\Exceptions\DatabaseConnectionException;
 
 class DatabaseConnectionController extends Controller
 {
@@ -51,15 +52,15 @@ class DatabaseConnectionController extends Controller
 
     public function testConnection($db_id) 
     {
-        $result = $this->createDynamicConnection($db_id);
-
-        if (! $result['status']) 
-        {    
+        try{
+            $this->createDynamicConnection($db_id); 
+        }catch(DatabaseConnectionException $e){
             return response()->json([
-                'message' => 'Failed to connect to  database',
-                'error'   => $result['error'],
+                'message'       => 'Database connection failed',
+                'error_type'    => $e->getType(),
+                'error_message' => $e->getMessage(),
             ], 422);
-        }  
+        }
 
         return response()->json([
                 'message' => 'Connected to database',
@@ -96,11 +97,22 @@ class DatabaseConnectionController extends Controller
                 'status'         => true,
                 'connectionName' => $connectionName,
             ];
-        } catch (\Exception $e) {
-            return [
-                'status' => false,
-                'error'  => $e->getMessage(),
-            ];
+        } catch (\PDOException $e) {
+            $message = $e->getMessage();
+
+            if (str_contains($message, 'Access denied')) {
+                throw new DatabaseConnectionException('Invalid database credentials.', 'invalid_credentials');
+            }
+            if (str_contains($message, 'Unknown database')) {
+                throw new DatabaseConnectionException('Database does not exist.', 'database_missing');
+            }
+            if (str_contains($message, 'Connection refused') || str_contains($message, 'php_network_getaddresses')) {
+                throw new DatabaseConnectionException('Database host unreachable.', 'host_unreachable');
+            }
+            if (str_contains($message, 'timed out')) {
+                throw new DatabaseConnectionException('Connection timed out.', 'connection_timeout');
+            }
+            throw new DatabaseConnectionException('Unknown database connection error.', 'unknown');
         }finally { // clean up DB connection 
             DB::disconnect($connectionName);
             DB::purge($connectionName);
