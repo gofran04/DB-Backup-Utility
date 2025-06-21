@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Config;
 use App\Http\Resources\BackupJobResource;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\DatabaseConnectionController;
+use App\Models\DatabaseConnection;
 
 class BackupJobController extends Controller
 {
@@ -23,7 +25,6 @@ class BackupJobController extends Controller
 
     public function store(StoreBackupJobRequest $request)
     {
-        
         $input = $request->validated();
 
         $backupJob = BackupJob::create([
@@ -32,28 +33,17 @@ class BackupJobController extends Controller
             'started_at'             => now()
         ]);
 
-        // connect to db
-        $conn = DB::table('database_connections')->find($input['db_id']);
-        if (! $conn) {
-            echo("❌ DB not found");
-            return 1;
+        // Test DB Connection
+        $result = DatabaseConnectionController::createDynamicConnection($input['db_id']);
+        if (! $result['status']) 
+        {
+            return response()->json([
+                'message' => 'Database connection failed before backup opeartion start.',
+                'error'   => $result['error'],
+            ], 422);
         }
-
-        // Create a temporary connection config
-        $connectionName = 'temp_' . uniqid();
-
-        Config::set("database.connections.{$connectionName}", [
-            'driver' => 'mysql',
-            'host' => $conn->host,
-            'port' => $conn->port,
-            'database' => $conn->db_name,
-            'username' => $conn->username,
-            'password' => $conn->password,
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-        ]);
-        DB::purge($connectionName);
-        DB::reconnect($connectionName);
+       
+        $connectionName = $result['connectionName'];
 
         // Run backup via backup service
         try {

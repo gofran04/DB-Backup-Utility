@@ -51,10 +51,28 @@ class DatabaseConnectionController extends Controller
 
     public function testConnection($db_id) 
     {
+        $result = $this->createDynamicConnection($db_id);
+
+        if (! $result['status']) 
+        {    
+            return response()->json([
+                'message' => 'Failed to connect to  database',
+                'error'   => $result['error'],
+            ], 422);
+        }  
+
+        return response()->json([
+                'message' => 'Connected to database',
+                ], 200 );
+    }
+
+    public static function createDynamicConnection($db_id)
+    {
         $databaseConnection = DatabaseConnection::findOrFail($db_id);
-    
+
         $connectionName = 'temp_' . uniqid();
-        DB::purge($connectionName); // Ensure it's clean
+
+        DB::purge($connectionName);
 
         Config::set("database.connections.{$connectionName}", [
             'driver'    => 'mysql',
@@ -68,21 +86,25 @@ class DatabaseConnectionController extends Controller
             'prefix'    => '',
             'strict'    => true,
             'engine'    => null,
-         ]);
+        ]);
 
-        //  Test it
         try {
+            DB::reconnect($connectionName);
             DB::connection($connectionName)->getPdo();
-            return response()->json([
-                    'message' => 'Connected to database',
-                ], 200 );
+
+            return [
+                'status'         => true,
+                'connectionName' => $connectionName,
+            ];
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to connect to database',
-            ], 422);
-        } finally { // clean up DB connection 
+            return [
+                'status' => false,
+                'error'  => $e->getMessage(),
+            ];
+        }finally { // clean up DB connection 
             DB::disconnect($connectionName);
             DB::purge($connectionName);
         }
     }
+
 }
