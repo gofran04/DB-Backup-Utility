@@ -3,17 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreBackupJobRequest;
-use App\Http\Requests\UpdateBackupJobRequest;
 use App\Models\BackupJob;
 use App\Services\DatabaseBackupService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Config;
 use App\Http\Resources\BackupJobResource;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\DatabaseConnectionController;
-use App\Models\DatabaseConnection;
 use App\Exceptions\DatabaseConnectionException;
+use App\Exceptions\BackupFailedException;
 
 class BackupJobController extends Controller
 {
@@ -65,12 +62,18 @@ class BackupJobController extends Controller
                 'file_size'    => $result['file_size'],
                 'completed_at' => now()
                 ]);
-            } catch (\Exception $e) { // Update job record with failure
+            } catch (BackupFailedException $e) { // Update job record with failure
                 $backupJob->update([
                     'status'        => 'failed',
                     'error_message' => $e->getMessage(),
                     'completed_at'  => now()
                 ]);
+
+                return response()->json([
+                    'message'       => 'Backup failed',
+                    'error_type'    => $e->getType(),
+                    'error_message' => $e->getMessage(),
+                ], 500); 
             }finally {
                 DB::disconnect($connectionName); // clean up connection
             }
