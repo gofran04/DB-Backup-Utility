@@ -3,68 +3,74 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateOrUpdateDatabaseConnectionRequest;
-use App\Http\Requests\UpdateDatabaseConnectionRequest;
 use App\Models\DatabaseConnection;
 use Symfony\Component\HttpFoundation\Response;
 use App\Http\Resources\DatabaseConnectionResource;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use App\Exceptions\DatabaseConnectionException;
+use App\Traits\ApiResponseTrait;
 
 class DatabaseConnectionController extends Controller
 {
+    use ApiResponseTrait;
+
     public function index()
     {
-        $db_connections = DatabaseConnection::all(); // You can use pagination if needed
+        $db_connections = DatabaseConnection::all(); 
 
-        return DatabaseConnectionResource::collection($db_connections);
+        return $this->successResponse(
+            DatabaseConnectionResource::collection($db_connections),
+            'Database connections retrieved',Response::HTTP_OK);
     }
 
     public function store(CreateOrUpdateDatabaseConnectionRequest $request)
     {
         $db_connection = DatabaseConnection::create($request->validated());
 
-        return (new DatabaseConnectionResource($db_connection))
-                ->response()
-                ->setStatusCode(Response::HTTP_CREATED);
+        return $this->successResponse(
+            new DatabaseConnectionResource($db_connection),
+            'Database connection created',201);
     }
 
     public function show(DatabaseConnection $databaseConnection)
     {
-        return new DatabaseConnectionResource($databaseConnection);
+        return $this->successResponse(
+            new DatabaseConnectionResource($databaseConnection),
+            'Database connection retrieved.',Response::HTTP_OK);
     }
 
     public function update(CreateOrUpdateDatabaseConnectionRequest $request, DatabaseConnection $databaseConnection)
     {
         $databaseConnection->update($request->validated());
 
-        return (new DatabaseConnectionResource($databaseConnection->refresh()))
-                ->response()
-                ->setStatusCode(Response::HTTP_ACCEPTED);
+        return $this->successResponse(
+            new DatabaseConnectionResource($databaseConnection->refresh()),
+            'Database connection updated successfully',202);
     }
 
     public function destroy(DatabaseConnection $databaseConnection)
     {
         $databaseConnection->delete();
-        return response('The DB Connection has been deleted');
+    
+        return $this->successResponse(
+            null,
+            'Database connection deleted successfully.',204);
     }
 
     public function testConnection($db_id) 
     {
         try{
-            $this->createDynamicConnection($db_id); 
+            $this->createDynamicConnection($db_id);
+            return $this->successResponse(null,'Database connection successful',200);
         }catch(DatabaseConnectionException $e){
-            return response()->json([
-                'message'       => 'Database connection failed',
-                'error_type'    => $e->getType(),
-                'error_message' => $e->getMessage(),
+            return $this->errorResponse(
+            'Database connection failed',
+            [
+                'type'    => $e->getType(),
+                'details' => $e->getMessage()
             ], 422);
         }
-
-        return response()->json([
-                'message' => 'Connected to database',
-                ], 200 );
     }
 
     public static function createDynamicConnection($db_id)
