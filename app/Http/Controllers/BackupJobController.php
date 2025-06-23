@@ -3,24 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreBackupJobRequest;
-use App\Http\Requests\UpdateBackupJobRequest;
 use App\Models\BackupJob;
 use App\Services\DatabaseBackupService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Config;
 use App\Http\Resources\BackupJobResource;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\DatabaseConnectionController;
-use App\Models\DatabaseConnection;
+use App\Exceptions\DatabaseConnectionException;
+use App\Exceptions\BackupFailedException;
+use Symfony\Component\HttpFoundation\Response;
+use App\Traits\ApiResponseTrait;
 
 class BackupJobController extends Controller
 {
+    use ApiResponseTrait;
+
     public function index()
     {
         $backup_jobs = BackupJob::all();
 
-        return BackupJobResource::collection($backup_jobs);
+        return $this->successResponse(
+            BackupJobResource::collection($backup_jobs),
+            'Backup Jobs retrieved',Response::HTTP_OK);
     }
 
     public function store(StoreBackupJobRequest $request)
@@ -34,44 +38,62 @@ class BackupJobController extends Controller
         ]);
 
         // Test DB Connection
-        $result = DatabaseConnectionController::createDynamicConnection($input['db_id']);
-        if (! $result['status']) 
-        {
-            return response()->json([
-                'message' => 'Database connection failed before backup opeartion start.',
-                'error'   => $result['error'],
-            ], 422);
+        try {
+            $result = DatabaseConnectionController::createDynamicConnection($input['db_id']);
+        }catch(DatabaseConnectionException $e){
+            return $this->errorResponse(
+                'Database connection failed',
+                [
+                    'type'    => $e->getType(),
+                    'message' => $e->getMessage(),
+                ],
+                Response::HTTP_UNPROCESSABLE_ENTITY
+            );
         }
        
         $connectionName = $result['connectionName'];
 
         // Run backup via backup service
         try {
-            $result = DatabaseBackupService::backup($connectionName,'backups');
+            $backupResult = DatabaseBackupService::backup($connectionName,'backups');
            
-            // Update job record with success
-            $backupJob->update([
+            $backupJob->update([ // Update job record with success
                 'status'       => 'completed',
-                'backup_path'  => $result['file_path'],
-                'file_size'    => $result['file_size'],
+                'backup_path'  => $backupResult['file_path'],
+                'file_size'    => $backupResult['file_size'],
                 'completed_at' => now()
                 ]);
-            } catch (\Exception $e) { // Update job record with failure
+            } catch (BackupFailedException $e) { // Update job record with failure
                 $backupJob->update([
                     'status'        => 'failed',
                     'error_message' => $e->getMessage(),
                     'completed_at'  => now()
                 ]);
+
+                return $this->errorResponse(
+                'Backup failed',
+                [
+                    'type'    => $e->getType(),
+                    'message' => $e->getMessage(),
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
             }finally {
                 DB::disconnect($connectionName); // clean up connection
             }
 
-        return response()->json($backupJob);
+        return $this->successResponse(
+            new BackupJobResource($backupJob->refresh()),
+            'Database backup completed successfully',
+            Response::HTTP_CREATED
+        );
     }
 
     public function show(BackupJob $backupJob)
     {
-        return new BackupJobResource($backupJob);
+        return $this->successResponse(
+            new BackupJobResource($backupJob),
+            'Backup Job retrieved.',Response::HTTP_OK);
     }
 
     public function destroy(BackupJob $backupJob)
@@ -85,10 +107,11 @@ class BackupJobController extends Controller
             if (!@unlink($fullPath)) {
                 Log::error("Failed to delete backup file: {$fullPath}");
 
-                return response()->json([
-                    'message'   => 'Failed to delete the backup file from disk.',
-                    'file_path' => $relativePath,
-                ], 500);
+                return $this->errorResponse(
+                    'Failed to delete the backup file from disk.',
+                    ['file_path' => $relativePath],
+                    Response::HTTP_INTERNAL_SERVER_ERROR
+                );
             }
         } else {
             Log::warning("Backup file not found during delete: {$fullPath}");
@@ -96,10 +119,12 @@ class BackupJobController extends Controller
 
         $backupJob->delete();
 
-        return response()->json([
-            'message' => $fileWasThere
+        return $this->successResponse(
+            null,
+            $fileWasThere
                 ? 'Backup file and record deleted successfully.'
                 : 'Backup record deleted. File was already missing.',
-        ]);
+            Response::HTTP_OK
+        );
     }
 }

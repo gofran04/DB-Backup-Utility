@@ -1,9 +1,7 @@
 <?php
 namespace App\Services;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Config;
+use App\Exceptions\BackupFailedException;
 
 class DatabaseBackupService
 {
@@ -28,10 +26,30 @@ class DatabaseBackupService
             escapeshellarg($fullPath)
         );
 
-         // Run command
+       // Run command
         $output = [];
-        $result = null;
+        $result = 0;
         exec($command, $output, $result);
+
+        $outputText = implode("\n", $output);
+
+        // Analyze common error cases
+        if ($result !== 0 || str_starts_with($outputText, 'mysqldump:')) 
+        {
+            if (str_contains($outputText, 'command not found')) {
+                throw new BackupFailedException('mysqldump command not found.', 'mysqldump_missing');
+            }
+            if (str_contains($outputText, 'Permission denied')) {
+                throw new BackupFailedException('Permission denied while writing backup file.', 'permission_denied');
+            }
+            if (str_contains($outputText, 'No space left on device')) {
+                throw new BackupFailedException('Insufficient disk space for backup.', 'disk_full');
+            }
+            if (str_contains($outputText, 'timed out')) {
+                throw new BackupFailedException('Database backup operation timed out.', 'timeout');
+            }
+            throw new BackupFailedException("Backup failed: $outputText", 'unknown');
+        }
 
         // Check if file was created and has content(avvoid getting size = 0)
         $fileSize = file_exists($fullPath) ? filesize($fullPath) : 0;
@@ -44,11 +62,5 @@ class DatabaseBackupService
                 'file_size'       => $fileSize,
             ];
         }
-
-        // Failure
-        return [
-            'status'    => false,
-            'error'     => implode("\n", $output),
-        ];
     }
 }
