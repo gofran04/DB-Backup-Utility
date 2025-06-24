@@ -24,4 +24,9 @@ class DatabaseConnection extends Model
      protected $hidden = [
         'password',
     ];
+
+    public function backupJobs()
+    {
+        return $this->hasMany(BackupJob::class);
+    }
 }
