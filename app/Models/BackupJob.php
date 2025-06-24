@@ -20,4 +20,9 @@ class BackupJob extends Model
         'file_size',
         'error_message'
     ];
+
+    public function databaseConnection()
+    {
+        return $this->belongsTo(DatabaseConnection::class);
+    }
 }
