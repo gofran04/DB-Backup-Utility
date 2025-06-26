@@ -77,4 +77,55 @@ class TestDatabaseConnectionService
             DB::purge($connectionName);
         }
     }
+
+    public static function testProfileConnection(array $config)
+    {
+        $connectionName = 'profile_' . uniqid();
+
+        \Illuminate\Support\Facades\DB::purge($connectionName);
+
+        \Illuminate\Support\Facades\Config::set("database.connections.{$connectionName}", [
+            'driver'    => $config['driver'] ?? 'mysql',
+            'host'      => $config['host'],
+            'port'      => $config['port'],
+            'database'  => $config['database'],
+            'username'  => $config['username'],
+            'password'  => $config['password'],
+            'charset'   => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix'    => '',
+            'strict'    => true,
+            'engine'    => null,
+        ]);
+
+        try {
+            \Illuminate\Support\Facades\DB::reconnect($connectionName);
+            \Illuminate\Support\Facades\DB::connection($connectionName)->getPdo();
+
+            return [
+                'status' => true,
+                'connectionName' => $connectionName,
+            ];
+        } catch (\PDOException $e) {
+            $message = $e->getMessage();
+
+            if (str_contains($message, 'Access denied')) {
+                throw new \App\Exceptions\DatabaseConnectionException('Invalid database credentials.', 'invalid_credentials');
+            }
+            if (str_contains($message, 'Unknown database')) {
+                throw new \App\Exceptions\DatabaseConnectionException('Database does not exist.', 'database_missing');
+            }
+            if (str_contains($message, 'Connection refused') || str_contains($message, 'php_network_getaddresses')) {
+                throw new \App\Exceptions\DatabaseConnectionException('Database host unreachable.', 'host_unreachable');
+            }
+            if (str_contains($message, 'timed out')) {
+                throw new \App\Exceptions\DatabaseConnectionException('Connection timed out.', 'connection_timeout');
+            }
+
+            throw new \App\Exceptions\DatabaseConnectionException('Unknown database connection error.', 'unknown');
+        } finally {
+            \Illuminate\Support\Facades\DB::disconnect($connectionName);
+            \Illuminate\Support\Facades\DB::purge($connectionName);
+        }
+    }
 }
