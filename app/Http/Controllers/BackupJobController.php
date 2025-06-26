@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreBackupJobRequest;
 use App\Models\BackupJob;
 use App\Services\DatabaseBackupService;
+use App\Services\BackupLoggerService;
 use App\Http\Resources\BackupJobResource;
 use Illuminate\Support\Facades\Log;
 use App\Exceptions\DatabaseConnectionException;
@@ -36,11 +37,7 @@ class BackupJobController extends Controller
         ]);
 
         // Log at the start of backup:
-        Log::info('Backup job started', [
-            'backup_job_id'    => $backupJob->id,
-            'db_connection_id' => $input['db_id'],
-            'db_name'          => $backupJob->databaseConnection->db_name
-        ]);
+        BackupLoggerService::logStart($backupJob);
 
         // Run backup via backup service
         try {
@@ -54,14 +51,8 @@ class BackupJobController extends Controller
                 'completed_at' => now()
                 ]);
 
-            // log after backup operation success:658
-            Log::info('Backup job completed successfully', [
-                'backup_job_id' => $backupJob->id,
-                'file_path'     => $backupResult['file_path'],
-                'file_size'     => $backupResult['file_size'],
-                'duration'      => now()->diffInSeconds($backupJob->started_at)
-            ]);
-
+            // log after backup operation success:
+            BackupLoggerService::logSuccess($backupJob, $backupResult['file_path'], $backupResult['file_size']);
             } catch (DatabaseConnectionException $e) {
                 return $this->errorResponse(
                     'Database connection failed',
@@ -79,12 +70,7 @@ class BackupJobController extends Controller
                 ]);
 
                 // On failure:
-                Log::error('Backup job failed', [
-                    'backup_job_id'    => $backupJob->id,
-                    'db_connection_id' => $input['db_id'],
-                    'error'            => $e->getMessage(),
-                    'trace'            => $e->getTraceAsString()
-                ]);
+                BackupLoggerService::logFailure($backupJob, $e);
 
                 return $this->errorResponse(
                 'Backup failed',
