@@ -2,11 +2,19 @@
 namespace App\Services;
 
 use App\Exceptions\BackupFailedException;
+use App\Services\TestDatabaseConnectionService;
+use App\Traits\ApiResponseTrait;
 
 class DatabaseBackupService
 {
-    public static function backup($connectionName, $outputPath)
+    use ApiResponseTrait;
+
+    public function backup($db_id, $outputPath)
     {
+        // Firstly test DB Connection
+        $result = TestDatabaseConnectionService::createDynamicConnection($db_id);
+        $connectionName = $result['connectionName'];
+
         // Get connection config from memory
         $config = config("database.connections.{$connectionName}");
 
@@ -17,7 +25,7 @@ class DatabaseBackupService
 
         // Build mysqldump command to output to stdout (no `> file`)
         $command = sprintf(
-            'mysqldump --user=%s --password=%s --host=%s --port=%s %s > %s 2>&1',
+            'mysqldump --user=%s --password=%s --host=%s --port=%s %s 2>&1 > %s',
             escapeshellarg($config['username']),
             escapeshellarg($config['password']),
             escapeshellarg($config['host']),
@@ -34,19 +42,28 @@ class DatabaseBackupService
         $outputText = implode("\n", $output);
 
         // Analyze common error cases
-        if ($result !== 0 || str_starts_with($outputText, 'mysqldump:')) 
+        if ($result !== 0 ) 
         {
-            if (str_contains($outputText, 'command not found')) {
+            if (stripos($outputText, 'access denied') !== false) {
+                throw new BackupFailedException('Invalid database credentials.', 'invalid_credentials');
+            }
+            if (stripos($outputText, 'sh: 1: mysqldump_fake: not found') !== false ||  stripos($outputText, 'command not found') !== false) {
                 throw new BackupFailedException('mysqldump command not found.', 'mysqldump_missing');
             }
-            if (str_contains($outputText, 'Permission denied')) {
+            if (stripos($outputText, 'permission denied') !== false) {
                 throw new BackupFailedException('Permission denied while writing backup file.', 'permission_denied');
             }
-            if (str_contains($outputText, 'No space left on device')) {
+            if (stripos($outputText, 'no space left on device') !== false) {
                 throw new BackupFailedException('Insufficient disk space for backup.', 'disk_full');
             }
-            if (str_contains($outputText, 'timed out')) {
+            if (stripos($outputText, 'timed out') !== false) {
                 throw new BackupFailedException('Database backup operation timed out.', 'timeout');
+            }
+            if (stripos($outputText, 'unknown mysql server host') !== false) {
+                throw new BackupFailedException('Unknown MySQL server host.', 'host_unreachable');
+            }
+            if (stripos($outputText, "can't connect to mysql server") !== false) {
+                throw new BackupFailedException('Cannot connect to MySQL server on the specified host.', 'host_unreachable');
             }
             throw new BackupFailedException("Backup failed: $outputText", 'unknown');
         }
