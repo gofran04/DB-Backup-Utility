@@ -5,10 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreBackupJobRequest;
 use App\Models\BackupJob;
 use App\Services\DatabaseBackupService;
-use Illuminate\Support\Facades\DB;
 use App\Http\Resources\BackupJobResource;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\DatabaseConnectionController;
 use App\Exceptions\DatabaseConnectionException;
 use App\Exceptions\BackupFailedException;
 use Symfony\Component\HttpFoundation\Response;
@@ -44,25 +42,10 @@ class BackupJobController extends Controller
             'db_name'          => $backupJob->databaseConnection->db_name
         ]);
 
-        // Test DB Connection
-        try {
-            $result = DatabaseConnectionController::createDynamicConnection($input['db_id']);
-        }catch(DatabaseConnectionException $e){
-            return $this->errorResponse(
-                'Database connection failed',
-                [
-                    'type'    => $e->getType(),
-                    'message' => $e->getMessage(),
-                ],
-                Response::HTTP_UNPROCESSABLE_ENTITY
-            );
-        }
-       
-        $connectionName = $result['connectionName'];
-
         // Run backup via backup service
         try {
-            $backupResult = DatabaseBackupService::backup($connectionName,'backups');
+            $service = new DatabaseBackupService();
+            $backupResult = $service->backup($input['db_id'],'backups');
            
             $backupJob->update([ // Update job record with success
                 'status'       => 'completed',
@@ -71,13 +54,23 @@ class BackupJobController extends Controller
                 'completed_at' => now()
                 ]);
 
-                // log after backup operation success:
-                Log::info('Backup job completed successfully', [
-                    'backup_job_id' => $backupJob->id,
-                    'file_path'     => $backupResult['file_path'],
-                    'file_size'     => $backupResult['file_size'],
-                    'duration'      => now()->diffInSeconds($backupJob->started_at)
-                ]);
+            // log after backup operation success:658
+            Log::info('Backup job completed successfully', [
+                'backup_job_id' => $backupJob->id,
+                'file_path'     => $backupResult['file_path'],
+                'file_size'     => $backupResult['file_size'],
+                'duration'      => now()->diffInSeconds($backupJob->started_at)
+            ]);
+
+            } catch (DatabaseConnectionException $e) {
+                return $this->errorResponse(
+                    'Database connection failed',
+                    [
+                        'type' => $e->getType(),
+                        'message' => $e->getMessage()
+                    ],
+                    Response::HTTP_UNPROCESSABLE_ENTITY
+                );
             } catch (BackupFailedException $e) { // Update job record with failure
                 $backupJob->update([
                     'status'        => 'failed',
@@ -101,8 +94,6 @@ class BackupJobController extends Controller
                 ],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
-            }finally {
-                DB::disconnect($connectionName); // clean up connection
             }
 
         return $this->successResponse(
