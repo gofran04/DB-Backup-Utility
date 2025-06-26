@@ -4,6 +4,7 @@ namespace App\Services;
 use App\Exceptions\BackupFailedException;
 use App\Services\TestDatabaseConnectionService;
 use App\Traits\ApiResponseTrait;
+use Illuminate\Support\Facades\Log;
 
 class DatabaseBackupService
 {
@@ -44,6 +45,13 @@ class DatabaseBackupService
         // Analyze common error cases
         if ($result !== 0 ) 
         {
+            // On failure:
+            Log::error('CLI Backup failed', [
+                'db_id'   => $db_id,
+                // 'error'            => $e->getMessage(),
+                // 'trace'            => $e->getTraceAsString()
+            ]);
+
             if (stripos($outputText, 'access denied') !== false) {
                 throw new BackupFailedException('Invalid database credentials.', 'invalid_credentials');
             }
