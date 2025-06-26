@@ -7,6 +7,7 @@ use App\Services\ConfigService;
 use App\Services\DatabaseBackupService;
 use App\Models\DatabaseConnection;
 use App\Exceptions\BackupFailedException;
+use Illuminate\Support\Facades\Log;
 
 class BackupDatabase extends Command
 {
@@ -38,14 +39,23 @@ class BackupDatabase extends Command
         }
 
         try {
+            $logContext = [
+                'source' => 'CLI',
+                'invoked_at' => now()->toDateTimeString()
+            ];
+
             $dbConfig = null;
 
             if ($profileName) // Handle profile-based backup
             {
+                $logContext['profile'] = $profileName;
+                Log::info("🔧 CLI Backup Started (Profile)", $logContext);
+
                 $this->info("🔍 Loading DB config from profile: $profileName");
                 $profiles = $this->configService->loadProfiles();
 
                 if (!isset($profiles[$profileName])) {
+                    Log::error("❌ CLI Backup Failed: Profile not found", $logContext);
                     $this->error("❌ Profile '$profileName' not found.");
                     return Command::FAILURE;
                 }
@@ -55,10 +65,15 @@ class BackupDatabase extends Command
             }
             else // Handle ID-based backup
             {
+                // Log at the start of backup
+                $logContext['db_id'] = $id;
+                Log::info("🔧 CLI Backup Started (DB ID)", $logContext);
+
                 $this->info("🔍 Loading DB config from database_connections table (ID: $id)");
                 $connection = DatabaseConnection::find($id);
 
                 if (!$connection) {
+                    Log::error("❌ CLI Backup Failed: DB ID not found", $logContext);
                     $this->error("❌ No database connection found with ID: $id");
                     return Command::FAILURE;
                 }
@@ -66,10 +81,19 @@ class BackupDatabase extends Command
                 $result = $this->backupService->backup($id, $outputPath);
             }
 
+            $duration = now()->diffInSeconds($logContext['invoked_at']);
+
             // Handle success response
             $this->info("✅ Backup successful!");
             $this->line("📁 File Path: storage/app/{$result['file_path']}");
             $this->line("📦 Size: {$result['file_size']} bytes");
+
+            //log after backup operation success
+            Log::info("✅ CLI Backup Success", array_merge($logContext, [
+                'file_path' => $result['file_path'],
+                'file_size' => $result['file_size'],
+                'duration'  => $duration,
+            ]));
 
             return Command::SUCCESS;
 
@@ -85,45 +109,3 @@ class BackupDatabase extends Command
         }
     }
 }
-//     public function handle(DatabaseBackupService $backupService)
-//     {
-//         $dbId = $this->argument('client_id');
-
-//         // Get DB config for that client from your main DB
-//         $conn = DB::table('database_connections')->find($dbId);
-//         if (! $conn) {
-//             $this->error("DB not found");
-//             return 1;
-//         }
-
-//         // Create a temporary connection config
-//         $connectionName = 'temp_' . uniqid();
-
-//         Config::set("database.connections.{$connectionName}", [
-//             'driver' => 'mysql',
-//             'host' => $conn->host,
-//             'port' => $conn->port,
-//             'database' => $conn->db_name,
-//             'username' => $conn->username,
-//             'password' => $conn->password,
-//             'charset' => 'utf8mb4',
-//             'collation' => 'utf8mb4_unicode_ci',
-//         ]);
-
-//         DB::purge($connectionName);
-//         DB::reconnect($connectionName);
-
-//         $this->info("🔗 Connected. Creating backup...");
-
-//         // Call the backup service
-//         $result = $backupService->backup($connectionName, '/app/backups');
-
-//         if ($result['status']) {
-//             $this->info("Backup complete: " . $result['file']);
-//         } else {
-//             $this->error("Backup failed:\n" . $result['error']);
-//         }
-
-//         return 0;
-//     }
-// }
