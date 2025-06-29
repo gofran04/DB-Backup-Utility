@@ -11,7 +11,7 @@ class ConfigService
 
     public function __construct()
     {
-        $this->configDir = $_SERVER['HOME'] . '/.db-backup';
+        $this->configDir = rtrim(getenv('HOME') ?: getenv('USERPROFILE') ?: base_path(), '/') . '/.db-backup';
         $this->configPath = $this->configDir . '/config.json';
     }
 
