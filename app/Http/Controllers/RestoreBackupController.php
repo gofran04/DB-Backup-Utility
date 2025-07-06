@@ -5,20 +5,32 @@ namespace App\Http\Controllers;
 use App\Http\Requests\RestoreBackupRequest;
 use App\Services\RestoreBackupService;
 use App\Services\ConfigService;
-use Illuminate\Http\JsonResponse;
-
+use App\Models\DatabaseConnection;
+use App\Factories\DatabaseAdapterFactory;
+use App\Traits\ApiResponseTrait;
 
 class RestoreBackupController extends Controller
 {
+    use ApiResponseTrait;
 
     function restoreBackup(RestoreBackupRequest $request)
     {
         $validated = $request->validated();
-    
-        $service = new RestoreBackupService(new ConfigService());
-        $result = $service->restore($validated);
+        $connection = DatabaseConnection::findOrFail($validated['db_id']);
 
-        return response()->json([$result['data'], $result['status']]);
+        // Use factory to resolve correct adapter
+        $adapterFactory = new DatabaseAdapterFactory();
+        $adapter = $adapterFactory->make($connection);
+
+        // Run backup
+        $restore_service = new RestoreBackupService(new ConfigService(), $adapter);
+        $restore_result = $restore_service->restore($validated);
+
+        return $this->successResponse(
+            null,
+            $restore_result['message'],
+            200,
+        );
     }
 
 }

@@ -12,6 +12,8 @@ use App\Exceptions\DatabaseConnectionException;
 use App\Exceptions\BackupFailedException;
 use Symfony\Component\HttpFoundation\Response;
 use App\Traits\ApiResponseTrait;
+use App\Models\DatabaseConnection;
+use App\Factories\DatabaseAdapterFactory;
 
 class BackupJobController extends Controller
 {
@@ -30,6 +32,8 @@ class BackupJobController extends Controller
     {
         $input = $request->validated();
 
+        $db_connection = DatabaseConnection::findOrFail($input['db_id']);
+
         $backupJob = BackupJob::create([
             'database_connection_id' => $input['db_id'],
             'status'                 => 'pending',
@@ -41,23 +45,29 @@ class BackupJobController extends Controller
 
         // Run backup via backup service
         try {
-            $service = new DatabaseBackupService();
-            $backupResult = $service->backup($input['db_id'],'backups');
+            // Use factory to resolve correct adapter
+            $adapterFactory = new DatabaseAdapterFactory();
+            $adapter = $adapterFactory->make($db_connection);
+
+            // Run backup
+            $backupService = new DatabaseBackupService($adapter);
+            $backupResult = $backupService->backup($db_connection, 'backups');// pass the absolute path 
            
             $backupJob->update([ // Update job record with success
                 'status'       => 'completed',
-                'backup_path'  => $backupResult['file_path'],
+                'backup_path'  => $backupResult['relative_path'],
                 'file_size'    => $backupResult['file_size'],
                 'completed_at' => now()
                 ]);
 
             // log after backup operation success:
-            BackupLoggerService::logSuccess($backupJob, $backupResult['file_path'], $backupResult['file_size']);
+            BackupLoggerService::logSuccess($backupJob, $backupResult['relative_path'], $backupResult['file_size']);
+           
             } catch (DatabaseConnectionException $e) {
                 return $this->errorResponse(
                     'Database connection failed',
                     [
-                        'type' => $e->getType(),
+                        'type'    => $e->getType(),
                         'message' => $e->getMessage()
                     ],
                     Response::HTTP_UNPROCESSABLE_ENTITY
@@ -73,13 +83,13 @@ class BackupJobController extends Controller
                 BackupLoggerService::logFailure($backupJob, $e);
 
                 return $this->errorResponse(
-                'Backup failed',
-                [
-                    'type'    => $e->getType(),
-                    'message' => $e->getMessage(),
-                ],
-                Response::HTTP_INTERNAL_SERVER_ERROR
-            );
+                    'Backup failed',
+                    [
+                        'type'    => $e->getType(),
+                        'message' => $e->getMessage(),
+                    ],
+                    Response::HTTP_INTERNAL_SERVER_ERROR
+                );
             }
 
         return $this->successResponse(
