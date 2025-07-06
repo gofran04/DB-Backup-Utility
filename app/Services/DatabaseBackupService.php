@@ -2,91 +2,62 @@
 namespace App\Services;
 
 use App\Exceptions\BackupFailedException;
+use App\Exceptions\DatabaseConnectionException;
 use App\Services\TestDatabaseConnectionService;
-use App\Traits\ApiResponseTrait;
-use Illuminate\Support\Facades\Log;
+use App\Models\DatabaseConnection;
+use App\Services\Contracts\DatabaseAdapterInterface;
 
 class DatabaseBackupService
 {
-    use ApiResponseTrait;
 
-    public function backup($db_id, $outputPath)
+    protected DatabaseAdapterInterface $adapter;
+
+    public function __construct(DatabaseAdapterInterface $adapter)
     {
-        // Firstly test DB Connection
-        $result = TestDatabaseConnectionService::createDynamicConnection($db_id);
-        $connectionName = $result['connectionName'];
+        $this->adapter = $adapter;
+    }
 
-        // Get connection config from memory
-        $config = config("database.connections.{$connectionName}");
+    public function backup(DatabaseConnection $connection, string $outputPath): array
+    {
+        try {
+            $this->adapter->testConnection();
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
 
-        // File name format like: client_db_backup_20250613_162510.sql
-        $filename = "{$config['database']}_backup_" . date('Ymd_His') . ".sql";
-        $relativePath = "{$outputPath}/{$filename}";
-        $fullPath = storage_path('app/' . $relativePath);
-
-        // Build mysqldump command to output to stdout (no `> file`)
-        $command = sprintf(
-            'mysqldump --user=%s --password=%s --host=%s --port=%s %s 2>&1 > %s',
-            escapeshellarg($config['username']),
-            escapeshellarg($config['password']),
-            escapeshellarg($config['host']),
-            escapeshellarg($config['port'] ?? '3306'),
-            escapeshellarg($config['database']),
-            escapeshellarg($fullPath)
-        );
-
-       // Run command
-        $output = [];
-        $result = 0;
-        exec($command, $output, $result);
-
-        $outputText = implode("\n", $output);
-
-        // Analyze common error cases
-        if ($result !== 0 ) 
-        {
-            // On failure:
-            Log::error('CLI Backup failed', [
-                'db_id'   => $db_id,
-                // 'error'            => $e->getMessage(),
-                // 'trace'            => $e->getTraceAsString()
-            ]);
-
-            if (stripos($outputText, 'access denied') !== false) {
-                throw new BackupFailedException('Invalid database credentials.', 'invalid_credentials');
+            if (str_contains($message, 'Access denied')) {
+                throw new DatabaseConnectionException('Invalid database credentials.', 'invalid_credentials');
             }
-            if (stripos($outputText, 'sh: 1: mysqldump_fake: not found') !== false ||  stripos($outputText, 'command not found') !== false) {
-                throw new BackupFailedException('mysqldump command not found.', 'mysqldump_missing');
+            if (str_contains($message, 'Unknown database')) {
+                throw new DatabaseConnectionException('Database does not exist.', 'database_missing');
             }
-            if (stripos($outputText, 'permission denied') !== false) {
-                throw new BackupFailedException('Permission denied while writing backup file.', 'permission_denied');
+            if (str_contains($message, 'Connection refused') || str_contains($message, 'php_network_getaddresses')) {
+                throw new DatabaseConnectionException('Database host unreachable.', 'host_unreachable');
             }
-            if (stripos($outputText, 'no space left on device') !== false) {
-                throw new BackupFailedException('Insufficient disk space for backup.', 'disk_full');
+            if (str_contains($message, 'timed out')) {
+                throw new DatabaseConnectionException('Connection timed out.', 'connection_timeout');
             }
-            if (stripos($outputText, 'timed out') !== false) {
-                throw new BackupFailedException('Database backup operation timed out.', 'timeout');
-            }
-            if (stripos($outputText, 'unknown mysql server host') !== false) {
-                throw new BackupFailedException('Unknown MySQL server host.', 'host_unreachable');
-            }
-            if (stripos($outputText, "can't connect to mysql server") !== false) {
-                throw new BackupFailedException('Cannot connect to MySQL server on the specified host.', 'host_unreachable');
-            }
-            throw new BackupFailedException("Backup failed: $outputText", 'unknown');
         }
 
-        // Check if file was created and has content(avvoid getting size = 0)
-        $fileSize = file_exists($fullPath) ? filesize($fullPath) : 0;
+        // Generate filename and paths
+        $connectionName = 'temp_' . uniqid();
+        $filename = $connection->db_name.'_'.$connectionName . '_backup_' . now()->format('Ymd_His') . '.sql';
 
-        // Success
-        if ($result === 0 && $fileSize > 0) {
-            return [
-                'status'          => true,
-                'file_path'       => $relativePath,
-                'file_size'       => $fileSize,
-            ];
+        $relativePath = trim($outputPath, '/') . '/' . $filename;
+        $absolutePath = storage_path('app/' . $relativePath);
+
+        $success = $this->adapter->backup($absolutePath);
+
+        if (! $success) {
+            throw new BackupFailedException("Backup operation failed.");
         }
+
+        $fileSize = file_exists($absolutePath) ? filesize($absolutePath) : null;
+
+        return [
+            'relative_path' => $relativePath,
+            'absolute_path' => $absolutePath,
+            'file_size'     => $fileSize,
+        ];
     }
 
     public function backupUsingProfile($config,$outputPath)

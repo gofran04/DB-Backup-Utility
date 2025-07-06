@@ -2,102 +2,57 @@
 namespace App\Services;
 
 use App\Services\ConfigService;
-use App\Models\DatabaseConnection;
-use Symfony\Component\HttpFoundation\Response;
+use App\Exceptions\DatabaseConnectionException;
+use App\Exceptions\BackupFailedException;
+use App\Services\Contracts\DatabaseAdapterInterface;
 
 class RestoreBackupService
 {
     protected ConfigService $configService;
+    protected DatabaseAdapterInterface $adapter;
 
-    public function __construct(ConfigService $configService)
+    public function __construct(ConfigService $configService,DatabaseAdapterInterface $adapter)
     {
         $this->configService = $configService;
+        $this->adapter = $adapter;
     }
 
-    public function restore($validated) 
+    public function restore($validated)
     {
+        try { // Test DB connection before restore
+            $this->adapter->testConnection();
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+
+            if (str_contains($message, 'Access denied')) {
+                throw new DatabaseConnectionException('Invalid database credentials.', 'invalid_credentials');
+            }
+            if (str_contains($message, 'Unknown database')) {
+                throw new DatabaseConnectionException('Database does not exist.', 'database_missing');
+            }
+            if (str_contains($message, 'Connection refused') || str_contains($message, 'php_network_getaddresses')) {
+                throw new DatabaseConnectionException('Database host unreachable.', 'host_unreachable');
+            }
+            if (str_contains($message, 'timed out')) {
+                throw new DatabaseConnectionException('Connection timed out.', 'connection_timeout');
+            }
+        }
+
         $file = $validated['file'];
 
-        // ✅ Normalize file path
         if (!str_starts_with($file, '/') && !preg_match('/^[A-Z]:\\\\/', $file)) {
-            $file = base_path($file);
+            $file = storage_path('app/' . $file);
         }
 
         if (!file_exists($file)) {
-            return [
-                'status' => 404,
-                'data' => ['message' => "Backup file not found: $file"],
-            ];
+            throw new BackupFailedException("Backup file not found: $file", 'file_not_found');
         }
 
-        $config = null;
-
-        if (! empty($validated['db_profile'])) {  // Load DB  from config file (via profile)
-            $profile = $validated['db_profile'];
-            $profiles = $this->configService->loadProfiles();
-
-            if (!isset($profiles[$profile])) {
-                return [
-                    'status' => 404,
-                    'data' => ['message' => "Profile '$profile' not found."],
-                ];
-            }
-
-            $config = $profiles[$profile];
-
-        }elseif ($validated['db_id']) { // Load DB  from Database (via id)
-            $db_id = $validated['db_id'];
-            $connection = DatabaseConnection::find($db_id);
-
-            if (!$connection) {
-                return [
-                    'status' => 404,
-                    'data' => ['message' => "Database ID '$db_id' not found."],
-                ];
-            }
-
-            $config = [
-                'driver'   => $connection->type,
-                'host'     => $connection->host,
-                'port'     => $connection->port,
-                'database' => $connection->db_name,
-                'username' => $connection->username,
-                'password' => $connection->password,
-            ];
-        }
-
-        // ✅ Validate driver
-        if (!isset($config['driver']) || $config['driver'] !== 'mysql') {
-            return [
-                'status' => 422,
-                'data' => ['message' => 'Only MySQL is supported for restore at this time.'],
-            ];
-        }
-
-        // ✅ Build restore command
-        $command = sprintf(
-            'mysql -h%s -P%s -u%s -p%s %s < %s',
-            escapeshellarg($config['host']),
-            escapeshellarg($config['port'] ?? '3306'),
-            escapeshellarg($config['username']),
-            escapeshellarg($config['password']),
-            escapeshellarg($config['database']),
-            escapeshellarg($file)
-        );
-
-        $exitCode = null;
-        system($command, $exitCode);
-
-        if ($exitCode === 0) {
-            return [
-                'status' => 200,
-                'data' => ['message' => 'Database restored successfully.'],
-            ];
-        }
+        // Run restore (delegated to adapter)
+        $this->adapter->restore($file);
 
         return [
-            'status' => 500,
-            'data' => ['message' => "Restore failed with exit code: $exitCode"],
-        ];        
+            'message' => 'Database restored successfully.',
+        ];
     }
 }
