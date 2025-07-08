@@ -25,19 +25,35 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
             mkdir($dir, 0755, true);
         }
 
+        // Step 1: Generate temporary .cnf file
+        $tempCnf = tempnam(sys_get_temp_dir(), 'mycnf_');
+
+        file_put_contents($tempCnf, "[client]
+            user={$this->connection->username}
+            password=\"{$this->connection->password}\"
+            host={$this->connection->host}
+            port={$this->connection->port}");
+
         $command = sprintf(
-            'mysqldump -u%s -p%s -h%s -P%s %s 2>&1 > %s',
-            escapeshellarg($this->connection->username),
-            escapeshellarg($this->connection->password),
-            escapeshellarg($this->connection->host),
-            $this->connection->port ?? 3306,
-            $this->connection->db_name,
+            'mysqldump --defaults-extra-file=%s %s 2>&1 > %s',
+            escapeshellarg($tempCnf),
+            escapeshellarg($this->connection->db_name),
             escapeshellarg($absolutePath)
-            );
+        );
+        // $command = sprintf(
+        //     'mysqldump -u%s -p%s -h%s -P%s %s 2>&1 > %s',
+        //     escapeshellarg($this->connection->username),
+        //     escapeshellarg($this->connection->password),
+        //     escapeshellarg($this->connection->host),
+        //     $this->connection->port ?? 3306,
+        //     $this->connection->db_name,
+        //     escapeshellarg($absolutePath)
+        //     );
 
        // Run command
         try {
         exec($command, $output, $exitCode);
+        unlink($tempCnf); // Always clean up, delete temp file
         $outputText = implode("\n", $output);
 
         if ($exitCode !== 0) {
@@ -84,19 +100,24 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
         if (!file_exists($filePath)) {
             throw new BackupFailedException("Backup file not found at: $filePath", 'file_not_found');
         }
+        
+        $tempCnf = tempnam(sys_get_temp_dir(), 'mycnf_');
 
-        // Build the restore command
+        file_put_contents($tempCnf, "[client]
+            user={$this->connection->username}
+            password=\"{$this->connection->password}\"
+            host={$this->connection->host}
+            port={$this->connection->port}");
+
         $command = sprintf(
-            'mysql -u%s -p%s -h%s -P%s %s < %s',
-            escapeshellarg($this->connection->username),
-            escapeshellarg($this->connection->password),
-            escapeshellarg($this->connection->host),
-            $this->connection->port ?? 3306,
+            'mysql --defaults-extra-file=%s %s < %s 2>&1',
+            escapeshellarg($tempCnf),
             escapeshellarg($this->connection->db_name),
             escapeshellarg($filePath)
         );
 
         exec($command . ' 2>&1', $output, $exitCode);
+        unlink($tempCnf); // Always clean up, delete temp file
         $outputText = implode("\n", $output);
 
         if ($exitCode !== 0) {
@@ -139,4 +160,3 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
         return true;
     }
 }
-
