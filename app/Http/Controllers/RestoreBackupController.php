@@ -24,7 +24,16 @@ class RestoreBackupController extends Controller
 
         // Run backup
         $restore_service = new RestoreBackupService(new ConfigService(), $adapter);
-        $restore_result = $restore_service->restore($validated);
+        try{
+            $restore_result = $restore_service->restore($validated);
+        }catch(\Exception $e){
+            return $this->errorResponse(
+                    'Restore DB failed',
+                    [
+                        'message' => $e->getMessage(),
+                    ],
+                );
+        }
 
         return $this->successResponse(
             null,
@@ -32,5 +41,4 @@ class RestoreBackupController extends Controller
             200,
         );
     }
-
 }
