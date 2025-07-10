@@ -3,7 +3,7 @@ namespace App\Services;
 
 use App\Services\ConfigService;
 use App\Exceptions\DatabaseConnectionException;
-use App\Exceptions\BackupFailedException;
+use App\Exceptions\RestoreFailedException;
 use App\Services\Contracts\DatabaseAdapterInterface;
 
 class RestoreBackupService
@@ -21,7 +21,7 @@ class RestoreBackupService
     {
         try { // Test DB connection before restore
             $this->adapter->testConnection();
-        } catch (\Exception $e) {
+        } catch (DatabaseConnectionException $e) {
             $message = $e->getMessage();
 
             if (str_contains($message, 'Access denied')) {
@@ -45,7 +45,7 @@ class RestoreBackupService
         }
 
         if (!file_exists($file)) {
-            throw new BackupFailedException("Backup file not found: $file", 'file_not_found');
+            throw new RestoreFailedException("Backup file not found: $file", 'file_not_found');
         }
 
         // Run restore (delegated to adapter)

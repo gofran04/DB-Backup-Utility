@@ -6,6 +6,7 @@ use App\Services\Contracts\DatabaseAdapterInterface;
 use App\Models\DatabaseConnection;
 use App\Exceptions\BackupFailedException;
 use App\Exceptions\DatabaseConnectionException;
+use App\Exceptions\RestoreFailedException;
 
 class MySQLDatabaseAdapter implements DatabaseAdapterInterface
 {
@@ -89,7 +90,7 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
     {
         // Check if backup file exists
         if (!file_exists($filePath)) {
-            throw new BackupFailedException("Backup file not found at: $filePath", 'file_not_found');
+            throw new RestoreFailedException("Backup file not found at: $filePath", 'file_not_found');
         }
         
         $tempCnf = tempnam(sys_get_temp_dir(), 'mycnf_');
@@ -114,18 +115,18 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
         if ($exitCode !== 0) {
             // Check for common errors and throw typed exceptions if you want
             if (stripos($outputText, 'access denied') !== false) {
-                throw new BackupFailedException('Invalid database credentials.', 'invalid_credentials');
+                throw new RestoreFailedException('Invalid database credentials.', 'invalid_credentials');
             }
             if (stripos($outputText, 'permission denied') !== false) {
-                throw new BackupFailedException('Permission denied while restoring database.', 'permission_denied');
+                throw new RestoreFailedException('Permission denied while restoring database.', 'permission_denied');
             }
             if (stripos($outputText, 'unknown mysql server host') !== false ||
                 stripos($outputText, "can't connect to mysql server") !== false) {
-                throw new BackupFailedException('Cannot connect to MySQL server.', 'host_unreachable');
+                throw new RestoreFailedException('Cannot connect to MySQL server.', 'host_unreachable');
             }
 
             // Unknown error fallback
-            throw new BackupFailedException("Restore failed: $outputText", 'unknown');
+            throw new RestoreFailedException("Restore failed: $outputText", 'unknown');
         }
 
         return true;

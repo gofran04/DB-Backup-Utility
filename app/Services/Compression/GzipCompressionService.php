@@ -3,8 +3,10 @@
 namespace App\Services\Compression;
 
 use App\Exceptions\CompresionFailedException;
+use App\Exceptions\RestoreFailedException;
 
-class GzipCompressionService implements CompressionServiceInterface
+
+class GzipCompressionService implements CompressionServiceInterface, DecompressionServiceInterface
 {
     public function compress(string $filePath, int $level = 6): string
     {
@@ -33,5 +35,32 @@ class GzipCompressionService implements CompressionServiceInterface
         }
 
         return $gzPath;
+    }
+
+    public function decompress(string $gzFilePath): string
+    {
+        $fullPath = storage_path('app/' . ltrim($gzFilePath, '/'));
+        if (!file_exists($fullPath)) {
+            throw new RestoreFailedException("Backup file not found: {$fullPath}", 'file_not_found');
+        }
+
+        $sqlFilePath = preg_replace('/\.gz$/', '', $fullPath);
+
+        $gzData = file_get_contents($fullPath);
+        if ($gzData === false) {
+            throw new RestoreFailedException("Failed to read compressed file: {$fullPath}", 'read_failed');
+        }
+
+        $sqlData = gzdecode($gzData);
+        if ($sqlData === false) {
+            throw new RestoreFailedException("Failed to decompress file: {$fullPath}", 'decompression_failed');
+        }
+
+        $written = file_put_contents($sqlFilePath, $sqlData);
+        if ($written === false) {
+            throw new RestoreFailedException("Failed to write decompressed file: {$fullPath}", 'write_failed');
+        }
+
+        return $sqlFilePath;
     }
 }
