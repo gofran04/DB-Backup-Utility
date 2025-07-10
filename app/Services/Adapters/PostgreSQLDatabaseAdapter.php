@@ -6,7 +6,7 @@ use App\Services\Contracts\DatabaseAdapterInterface;
 use App\Models\DatabaseConnection;
 use App\Exceptions\BackupFailedException;
 use App\Exceptions\DatabaseConnectionException;
-use Exception;
+use App\Exceptions\RestoreFailedException;
 use Illuminate\Support\Facades\Log;
 
 
@@ -112,22 +112,22 @@ class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
                     stripos($outputText, 'role') !== false && stripos($outputText, 'does not exist') !== false ||
                     stripos($outputText, 'FATAL') !== false && stripos($outputText, 'authentication') !== false
                 ) {
-                    throw new BackupFailedException('Invalid PostgreSQL credentials or role does not exist.', 'invalid_credentials');
+                    throw new RestoreFailedException('Invalid PostgreSQL credentials or role does not exist.', 'invalid_credentials');
                 }
 
                 if (stripos($outputText, 'permission denied') !== false) {
-                    throw new BackupFailedException('Permission denied while restoring database.', 'permission_denied');
+                    throw new RestoreFailedException('Permission denied while restoring database.', 'permission_denied');
                 }
 
                 if (stripos($outputText, 'No such file') !== false) {
-                    throw new BackupFailedException('Backup file does not exist.', 'file_missing');
+                    throw new RestoreFailedException('Backup file does not exist.', 'file_missing');
                 }
 
-                throw new BackupFailedException("Restore failed: $outputText", 'unknown');
+                throw new RestoreFailedException("Restore failed: $outputText", 'unknown');
             }
 
             return true;
-        } catch (Exception $e) {
+        } catch (RestoreFailedException $e) {
             throw $e;
         }
     }
