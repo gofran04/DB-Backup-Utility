@@ -5,7 +5,9 @@ namespace App\Services\Adapters;
 use App\Services\Contracts\DatabaseAdapterInterface;
 use App\Models\DatabaseConnection;
 use App\Exceptions\BackupFailedException;
+use App\Exceptions\DatabaseConnectionException;
 use Exception;
+
 
 class MySQLDatabaseAdapter implements DatabaseAdapterInterface
 {
@@ -40,15 +42,6 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
             escapeshellarg($this->connection->db_name),
             escapeshellarg($absolutePath)
         );
-        // $command = sprintf(
-        //     'mysqldump -u%s -p%s -h%s -P%s %s 2>&1 > %s',
-        //     escapeshellarg($this->connection->username),
-        //     escapeshellarg($this->connection->password),
-        //     escapeshellarg($this->connection->host),
-        //     $this->connection->port ?? 3306,
-        //     $this->connection->db_name,
-        //     escapeshellarg($absolutePath)
-        //     );
 
        // Run command
         try {
@@ -86,7 +79,7 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
             throw new BackupFailedException("Backup failed with unknown error: $outputText", 'unknown');
         }
 
-        return true;
+        return $absolutePath;
 
         } catch (BackupFailedException $e) {
             // rethrow for upper-level service to handle
@@ -154,7 +147,7 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
         exec($cmd . ' 2>&1', $output, $exitCode);
 
         if ($exitCode !== 0) {
-            throw new \Exception(implode("\n", $output)); // this is key
+            throw new DatabaseConnectionException(implode("\n", $output)); // this is key
         }
 
         return true;
