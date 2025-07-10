@@ -3,16 +3,19 @@ namespace App\Services;
 
 use App\Exceptions\BackupFailedException;
 use App\Exceptions\DatabaseConnectionException;
+use App\Exceptions\CompresionFailedException;
 use App\Services\TestDatabaseConnectionService;
 use App\Models\DatabaseConnection;
 use App\Services\Contracts\DatabaseAdapterInterface;
+use Illuminate\Support\Facades\Log;
+use App\Services\Compression\CompressionServiceInterface;
 
 class DatabaseBackupService
 {
 
     protected DatabaseAdapterInterface $adapter;
 
-    public function __construct(DatabaseAdapterInterface $adapter)
+    public function __construct(DatabaseAdapterInterface $adapter, protected CompressionServiceInterface $compressor)
     {
         $this->adapter = $adapter;
     }
@@ -45,12 +48,17 @@ class DatabaseBackupService
         $relativePath = trim($outputPath, '/') . '/' . $filename;
         $absolutePath = storage_path('app/' . $relativePath);
 
-        $success = $this->adapter->backup($absolutePath);
+        $sqlFile = $this->adapter->backup($absolutePath);
 
-        if (! $success) {
-            throw new BackupFailedException("Backup operation failed.");
+        try { // compress dump file
+            $gzFile = $this->compressor->compress($sqlFile, level: 6);
+            Log::info("Backup compressed: {$gzFile}");
+        } catch (CompresionFailedException $e) {
+            Log::error("Compression failed: " . $e->getMessage());
+            throw $e;
+
         }
-
+        
         $fileSize = file_exists($absolutePath) ? filesize($absolutePath) : null;
 
         return [
