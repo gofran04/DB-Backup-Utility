@@ -49,8 +49,6 @@ class DatabaseBackupService
         $absolutePath = storage_path('app/' . $relativePath);
 
         $sqlFile = $this->adapter->backup($absolutePath);
-        $sqlFile = $sqlFile.'ss';
-/////
 
         try { // compress dump file
             $gzFile = $this->compressor->compress($sqlFile, level: 6);
@@ -60,7 +58,7 @@ class DatabaseBackupService
             throw $e;
 
         }
-/////
+        
         $fileSize = file_exists($absolutePath) ? filesize($absolutePath) : null;
 
         return [

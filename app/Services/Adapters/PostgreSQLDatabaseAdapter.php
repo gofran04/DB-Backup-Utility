@@ -5,7 +5,10 @@ namespace App\Services\Adapters;
 use App\Services\Contracts\DatabaseAdapterInterface;
 use App\Models\DatabaseConnection;
 use App\Exceptions\BackupFailedException;
+use App\Exceptions\DatabaseConnectionException;
 use Exception;
+use Illuminate\Support\Facades\Log;
+
 
 class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
 {
@@ -16,7 +19,7 @@ class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
         $this->connection = $connection;
     }
 
-    public function backup(string $outputPath): bool
+    public function backup(string $outputPath)
     {
         // Ensure the backup directory exists
         $dir = dirname($outputPath);
@@ -76,9 +79,9 @@ class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
 
             // Write to file only after success
             file_put_contents($outputPath, implode("\n", $output));
-            
-            return true;
-        } catch (Exception $e) {
+            Log::info("from adapter: " . $outputPath);
+            return $outputPath;
+        } catch (BackupFailedException $e) {
             // rethrow for upper-level service to handle
             throw $e;        
         }
@@ -142,7 +145,7 @@ class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
 
         exec($cmd, $output, $exitCode);
         if ($exitCode !== 0) {
-            throw new \Exception(implode("\n", $output)); // this is key
+            throw new DatabaseConnectionException(implode("\n", $output)); // this is key
         }
 
         return $exitCode === 0;

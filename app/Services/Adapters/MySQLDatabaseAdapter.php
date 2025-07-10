@@ -6,8 +6,6 @@ use App\Services\Contracts\DatabaseAdapterInterface;
 use App\Models\DatabaseConnection;
 use App\Exceptions\BackupFailedException;
 use App\Exceptions\DatabaseConnectionException;
-use Exception;
-
 
 class MySQLDatabaseAdapter implements DatabaseAdapterInterface
 {
