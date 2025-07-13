@@ -48,7 +48,7 @@ class DatabaseBackupService
         $relativePath = trim($outputPath, '/') . '/' . $filename;
         $absolutePath = storage_path('app/' . $relativePath);
 
-        $sqlFile = $this->adapter->backup($absolutePath);
+        $sqlFile = $this->adapter->backup($absolutePath);  
 
         try { // compress dump file
             $gzFile = $this->compressor->compress($sqlFile, level: 6);
@@ -56,7 +56,6 @@ class DatabaseBackupService
         } catch (CompresionFailedException $e) {
             Log::error("Compression failed: " . $e->getMessage());
             throw $e;
-
         }
         
         $fileSize = file_exists($absolutePath) ? filesize($absolutePath) : null;

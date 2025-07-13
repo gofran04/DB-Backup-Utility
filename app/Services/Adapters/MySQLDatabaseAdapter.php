@@ -7,6 +7,7 @@ use App\Models\DatabaseConnection;
 use App\Exceptions\BackupFailedException;
 use App\Exceptions\DatabaseConnectionException;
 use App\Exceptions\RestoreFailedException;
+use Illuminate\Support\Facades\Log;
 
 class MySQLDatabaseAdapter implements DatabaseAdapterInterface
 {
@@ -29,12 +30,16 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
         // Step 1: Generate temporary .cnf file
         $tempCnf = tempnam(sys_get_temp_dir(), 'mycnf_');
 
-        file_put_contents($tempCnf, "[client]
-            user={$this->connection->username}
-            password=\"{$this->connection->password}\"
-            host={$this->connection->host}
-            port={$this->connection->port}");
+        $configg = <<<CNF
+        [client]
+        user={$this->connection->username}
+        password={$this->connection->password}
+        host={$this->connection->host}
+        port={$this->connection->port}
+        CNF;
 
+        file_put_contents($tempCnf, $configg);
+    
         $command = sprintf(
             'mysqldump --defaults-extra-file=%s %s 2>&1 > %s',
             escapeshellarg($tempCnf),
