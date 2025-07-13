@@ -14,7 +14,8 @@ use App\Services\BackupLoggerService;
 use App\Exceptions\BackupFailedException;
 use App\Exceptions\DatabaseConnectionException;
 use App\Exceptions\CompresionFailedException;
-
+use App\Notifications\ScheduledBackupFailed;
+use Illuminate\Support\Facades\Notification;
 
 class RunScheduledBackups extends Command
 {
@@ -67,8 +68,13 @@ class RunScheduledBackups extends Command
                         'error_message' => $e->getMessage(),
                         'completed_at'  => now()
                     ]);
+
                     BackupLoggerService::logFailure($backupJob, $e);
                     $this->error("❌ Backup failed: " . $e->getMessage());
+
+                    // Send alert via email
+                    Notification::route('mail', 'admin@example.com')
+                        ->notify(new ScheduledBackupFailed($backupJob));
                 }
             }
         }
