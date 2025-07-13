@@ -40,6 +40,7 @@ class BackupJobController extends Controller
         $backupJob = BackupJob::create([
             'database_connection_id' => $input['db_id'],
             'status'                 => 'pending',
+            'mechanism'              => 'manual',
             'started_at'             => now()
         ]);
 

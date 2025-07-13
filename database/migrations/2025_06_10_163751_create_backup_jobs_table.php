@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('database_connection_id')->constrained()->onDelete('cascade');
             $table->string('backup_path')->nullable();
             $table->enum('status', ['pending', 'running', 'completed', 'failed']);
+            $table->enum('mechanism', ['manual', 'automated'])->default('manual');
             $table->timestamp('started_at');
             $table->timestamp('completed_at')->nullable();
             $table->bigInteger('file_size')->nullable();

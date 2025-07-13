@@ -9,6 +9,12 @@ use Cron\CronExpression;
 use Carbon\Carbon;
 use App\Factories\DatabaseAdapterFactory;
 use App\Services\Compression\CompressionServiceInterface;
+use App\Models\BackupJob;
+use App\Services\BackupLoggerService;
+use App\Exceptions\BackupFailedException;
+use App\Exceptions\DatabaseConnectionException;
+use App\Exceptions\CompresionFailedException;
+
 
 class RunScheduledBackups extends Command
 {
@@ -24,6 +30,15 @@ class RunScheduledBackups extends Command
         {
             if ($this->isDue($schedule->cron_expression, $now)) 
             {
+                $backupJob = BackupJob::create([
+                    'database_connection_id' => $schedule->dbConnection->id,
+                    'status'                 => 'pending',
+                    'mechanism'              => 'automated',
+                    'started_at'             => now()
+                ]);
+
+                BackupLoggerService::logStart($backupJob);
+
                 // Use factory to resolve correct adapter
                 $adapter = (new DatabaseAdapterFactory())->make($schedule->dbConnection); 
                 
@@ -35,9 +50,24 @@ class RunScheduledBackups extends Command
 
                 $this->info("Running backup for schedule ID: {$schedule->id}");
                 try {
-                    $backupService->backup($schedule->dbConnection,'backups'); // assumes this method exists
+                    $result = $backupService->backup($schedule->dbConnection,'backups'); // assumes this method exists
+                    $backupJob->update([
+                        'status'       => 'completed',
+                        'backup_path'  => $result['relative_path'],
+                        'file_size'    => $result['file_size'],
+                        'completed_at' => now()
+                    ]);
+
+                    BackupLoggerService::logSuccess($backupJob, $result['relative_path'], $result['file_size']);
+
                     $this->info("✅ Backup completed for connection ID: {$schedule->dbConnection->id}");
-                } catch (\Exception $e) {
+                } catch (DatabaseConnectionException | BackupFailedException | CompresionFailedException $e) {
+                    $backupJob->update([
+                        'status'        => 'failed',
+                        'error_message' => $e->getMessage(),
+                        'completed_at'  => now()
+                    ]);
+                    BackupLoggerService::logFailure($backupJob, $e);
                     $this->error("❌ Backup failed: " . $e->getMessage());
                 }
             }

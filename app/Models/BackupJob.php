@@ -15,6 +15,7 @@ class BackupJob extends Model
         'database_connection_id',
         'backup_path',
         'status',
+        'mechanism',
         'started_at',
         'completed_at',
         'file_size',
