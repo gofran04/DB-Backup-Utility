@@ -29,4 +29,9 @@ class DatabaseConnection extends Model
     {
         return $this->hasMany(BackupJob::class);
     }
+
+    public function taskSchedules()
+    {
+        return $this->hasMany(BackupSchedule::class);
+    }
 }
