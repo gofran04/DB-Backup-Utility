@@ -66,6 +66,10 @@ class BackupScheduleController extends Controller
 
     public function destroy(BackupSchedule $backupSchedule)
     {
-        //
+        $backupSchedule->delete();
+    
+        return $this->successResponse(
+            null,
+            'Task Schedule deleted successfully.',Response::HTTP_OK);
     }
 }
