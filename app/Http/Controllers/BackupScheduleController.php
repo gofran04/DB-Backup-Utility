@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\BackupSchedule;
-use Illuminate\Http\Request;
 use App\Http\Resources\BackupScheduleResource;
 use Symfony\Component\HttpFoundation\Response;
 use App\Traits\ApiResponseTrait;
@@ -71,5 +70,15 @@ class BackupScheduleController extends Controller
         return $this->successResponse(
             null,
             'Task Schedule deleted successfully.',Response::HTTP_OK);
+    }
+
+    public function toggle(BackupSchedule $backupSchedule)
+    {
+        $backupSchedule->update([
+            'enabled' => !$backupSchedule->enabled,
+        ]);
+        return $this->successResponse(
+            new BackupScheduleResource($backupSchedule->refresh()),
+            'Task Schedule Status Changed successfully',202);
     }
 }

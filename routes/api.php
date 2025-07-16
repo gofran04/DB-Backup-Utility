@@ -11,5 +11,6 @@ use App\Services\TestDatabaseConnectionService;
 Route::apiResource('database-connections',DatabaseConnectionController::class);
 Route::apiResource('backup-jobs',BackupJobController::class)->except(['update']);
 Route::apiResource('backup-schedules',BackupScheduleController::class);
+Route::patch('backup-schedules/{backupSchedule}/toggle',[BackupScheduleController::class,'toggle']);
 Route::get('test-db-connection/{id}',[TestDatabaseConnectionService::class,'testConnection']);
 Route::post('restore',[RestoreBackupController::class,'restoreBackup']);
