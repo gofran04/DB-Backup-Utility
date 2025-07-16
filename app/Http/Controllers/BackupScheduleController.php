@@ -48,9 +48,20 @@ class BackupScheduleController extends Controller
     }
 
 
-    public function update(Request $request, BackupSchedule $backupSchedule)
+    public function update(CreateOrUpdateBackupScheduleRequest $request, BackupSchedule $backupSchedule)
     {
-        //
+        $validated = $request->validated();
+        $cronExpression = ScheduleFrequency::OPTIONS[$validated['frequency']];
+
+        $backupSchedule->update([
+            'db_connection_id' => $validated['db_connection_id'],
+            'frequency'        => $validated['frequency'],
+            'cron_expression'  => $cronExpression,
+        ]);
+
+        return $this->successResponse(
+            new BackupScheduleResource($backupSchedule->refresh()),
+            'Task Schedule updated successfully',202);
     }
 
     public function destroy(BackupSchedule $backupSchedule)

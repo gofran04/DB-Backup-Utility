@@ -25,8 +25,11 @@ class CreateOrUpdateBackupScheduleRequest extends FormRequest
     {
         return [
             'db_connection_id' => 'required||exists:database_connections,id',
-            'enabled'          => 'required|boolean',
             'frequency'        => ['required', 'in:' . implode(',', array_keys(ScheduleFrequency::OPTIONS))],
         ];
+
+        if ($this->isMethod('post')) { // Only during store()
+        $rules['enabled'] = ['sometimes', 'boolean'];
+    }
     }
 }
