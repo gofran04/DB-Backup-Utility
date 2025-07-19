@@ -20,5 +20,13 @@ class DBConnectionsTest extends TestCase
         $this->assertDatabaseCount('database_connections', 10);
     }
 
+    public function test_return_specific_db_connection()
+    {
+        $db_connection = DatabaseConnection::factory()->create();
+        $response = $this->get('api/database-connections/'.$db_connection->id);
+
+        $response->assertOk();
+        $this->assertDatabaseCount('database_connections', 1);
+    }
 
 }
