@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\DatabaseConnection;
+use Illuminate\Support\Facades\Crypt;
 
 class DBConnectionsTest extends TestCase
 {
@@ -29,4 +30,27 @@ class DBConnectionsTest extends TestCase
         $this->assertDatabaseCount('database_connections', 1);
     }
 
+    public function test_store_new_db_connection()
+    {
+        $data = [
+            'connection_name' => 'fake name for testing',
+            'type'            => 'mysql',
+            'host'            => '127.0.0.1',
+            'port'            => 3306,
+            'db_name'         => 'TechFlex',
+            'username'        => 'newuser',
+            'password'        => Crypt::encryptString('newuserpass'),
+        ];
+
+        $response = $this->post('api/database-connections/',$data);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseCount('database_connections', 1);
+        $this->assertDatabaseHas('database_connections', [
+            'connection_name' => 'fake name for testing',
+        ]);
+        $response->assertJsonFragment([
+            'connection_name' => 'fake name for testing',
+        ]);
+    }
 }
