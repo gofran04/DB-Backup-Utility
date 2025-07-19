@@ -6,10 +6,8 @@ use App\Http\Requests\CreateOrUpdateDatabaseConnectionRequest;
 use App\Models\DatabaseConnection;
 use Symfony\Component\HttpFoundation\Response;
 use App\Http\Resources\DatabaseConnectionResource;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Config;
-use App\Exceptions\DatabaseConnectionException;
 use App\Traits\ApiResponseTrait;
+use Illuminate\Support\Facades\Crypt;
 
 class DatabaseConnectionController extends Controller
 {
@@ -26,7 +24,10 @@ class DatabaseConnectionController extends Controller
 
     public function store(CreateOrUpdateDatabaseConnectionRequest $request)
     {
-        $db_connection = DatabaseConnection::create($request->validated());
+        $inputs = $request->validated();
+        $inputs['password'] = Crypt::encryptString($inputs['password']);
+
+        $db_connection = DatabaseConnection::create($inputs);
 
         return $this->successResponse(
             new DatabaseConnectionResource($db_connection),

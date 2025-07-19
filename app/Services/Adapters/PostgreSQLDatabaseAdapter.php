@@ -8,6 +8,7 @@ use App\Exceptions\BackupFailedException;
 use App\Exceptions\DatabaseConnectionException;
 use App\Exceptions\RestoreFailedException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Crypt;
 
 
 class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
@@ -27,9 +28,11 @@ class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
             mkdir($dir, 0755, true);
         }
 
+        $password = Crypt::decryptString($this->connection->password);
+
         $cmd = sprintf(
             'PGPASSWORD=%s /usr/bin/pg_dump -U %s -h %s -p %d -F p %s 2>&1',
-            escapeshellarg($this->connection->password),
+            escapeshellarg($password),
             escapeshellarg($this->connection->username),
             escapeshellarg($this->connection->host),
             $this->connection->port ?? 5432,
@@ -89,9 +92,11 @@ class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
 
     public function restore(string $filePath)
     {
+        $password = Crypt::decryptString($this->connection->password);
+
         $cmd = sprintf(
             'PGPASSWORD=%s /usr/bin/psql -U %s -h %s -p %d -d %s -f %s 2>&1',
-            escapeshellarg($this->connection->password),
+            escapeshellarg($password),
             escapeshellarg($this->connection->username),
             escapeshellarg($this->connection->host),
             $this->connection->port ?? 5432,
@@ -135,9 +140,11 @@ class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
 
     public function testConnection()
     {
+        $password = Crypt::decryptString($this->connection->password);
+
         $cmd = sprintf(
             'PGPASSWORD=%s pg_isready -U %s -h %s -p %d',
-            escapeshellarg($this->connection->password),
+            escapeshellarg($password),
             escapeshellarg($this->connection->username),
             escapeshellarg($this->connection->host),
             $this->connection->port ?? 5432
