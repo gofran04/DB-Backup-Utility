@@ -1,6 +1,7 @@
 <?php
 
 namespace Database\Factories;
+use Illuminate\Support\Facades\Crypt;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -16,8 +17,16 @@ class DatabaseConnectionFactory extends Factory
      */
     public function definition(): array
     {
+        $plainPassword = 'newuserpass';
+
         return [
-            //
+             'connection_name' => fake()->name(),
+            'type'            => 'mysql',
+            'host'            => '127.0.0.1',
+            'port'            => 3306,
+            'db_name'         => 'TechFlex',
+            'username'        => 'newuser',
+            'password'        => Crypt::encryptString($plainPassword),
         ];
     }
 }
