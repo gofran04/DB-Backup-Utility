@@ -53,4 +53,29 @@ class DBConnectionsTest extends TestCase
             'connection_name' => 'fake name for testing',
         ]);
     }
+
+    public function test_update_specific_db_connection()
+    {
+        $db_connection = DatabaseConnection::factory()->create(['connection_name' => 'fake name']);
+        $data = [
+            'connection_name' => 'updated name',
+            'type'            => $db_connection->type,
+            'host'            => $db_connection->host,
+            'port'            => $db_connection->port,
+            'db_name'         => $db_connection->db_name,
+            'username'        => $db_connection->username,
+            'password'        => $db_connection->password, 
+        ];
+
+        $response = $this->putJson('api/database-connections/'.$db_connection->id,$data);
+
+        $response->assertStatus(202);
+        $response->assertJsonFragment([
+            'connection_name' => 'updated name',
+        ]);
+
+        $this->assertDatabaseHas('database_connections', [
+            'connection_name' => 'updated name',
+        ]);
+    }
 }
