@@ -6,7 +6,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\DatabaseConnection;
-use Illuminate\Support\Facades\Crypt;
 
 class DBConnectionsTest extends TestCase
 {
@@ -39,7 +38,7 @@ class DBConnectionsTest extends TestCase
             'port'            => 3306,
             'db_name'         => 'TechFlex',
             'username'        => 'newuser',
-            'password'        => Crypt::encryptString('newuserpass'),
+            'password'        => 'newuserpass',
         ];
 
         $response = $this->post('api/database-connections/',$data);
@@ -86,6 +85,23 @@ class DBConnectionsTest extends TestCase
 
         $response->assertStatus(204);
         $this->assertSoftDeleted($db_connection);
+    }
+
+    public function test_prevent_store_new_db_connection_with_invalid_inputs()
+    {
+        $data = [
+            'connection_name' => 'fake name for testing',
+            'type'            => 'wrong type',
+            'host'            => '127.0.0.1',
+            'port'            => 3306,
+            'db_name'         => 'TechFlex',
+            'username'        => 'newuser',
+            'password'        => 'newuserpass',
+        ];
+
+        $response = $this->postJson('api/database-connections/',$data);
+
+        $response->assertJsonValidationErrorFor('type');
     }
     
 }
