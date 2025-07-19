@@ -78,4 +78,14 @@ class DBConnectionsTest extends TestCase
             'connection_name' => 'updated name',
         ]);
     }
+
+     public function test_delete_specific_db_connection()
+    {
+        $db_connection = DatabaseConnection::factory()->create(['connection_name' => 'fake name for testing']);
+        $response = $this->deleteJson('api/database-connections/'.$db_connection->id);
+
+        $response->assertStatus(204);
+        $this->assertSoftDeleted($db_connection);
+    }
+    
 }
