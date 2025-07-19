@@ -40,6 +40,20 @@ class BackupJobTest extends TestCase
         $this->assertDatabaseCount('backup_jobs', 4);
     }
 
+    public function test_return_specific_backup_job()
+    {
+        $backup_job = BackupJob::factory()->create();
+        $response = $this->getJson('api/backup-jobs/'.$backup_job->id);
+
+        $response->assertOk();
+        $response->assertJson([
+                'data' => [
+                    'id' => $backup_job->id,
+                ],
+            ]);
+        $this->assertDatabaseCount('backup_jobs', 1);
+    }
+
     public function test_store_new_backup_job()
     {
         $db_connection = DatabaseConnection::factory()->create();
