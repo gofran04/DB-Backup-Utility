@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\DatabaseConnection;
+use App\Models\BackupJob;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 
@@ -20,6 +21,23 @@ class BackupJobTest extends TestCase
         $testBackupPath = storage_path('app/test-backups');
         File::ensureDirectoryExists($testBackupPath);
         Config::set('backup.storage_path', $testBackupPath);
+    }
+
+    protected function tearDown(): void
+    {
+        File::deleteDirectory(storage_path('app/test-backups'));
+
+        parent::tearDown();
+    }
+
+    public function test_return_all_backup_jobs()
+    {
+        BackupJob::factory()->count(4)->create();
+        $response = $this->getJson('api/backup-jobs');
+
+        $response->assertOk();
+        $response->assertJsonCount(4, 'data'); 
+        $this->assertDatabaseCount('backup_jobs', 4);
     }
 
     public function test_store_new_backup_job()
@@ -39,12 +57,7 @@ class BackupJobTest extends TestCase
         $this->assertNotEmpty($files);
     }
 
-    protected function tearDown(): void
-    {
-        File::deleteDirectory(storage_path('app/test-backups'));
-
-        parent::tearDown();
-    }
+    
 
    
 }
