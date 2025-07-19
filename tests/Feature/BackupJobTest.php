@@ -53,6 +53,15 @@ class BackupJobTest extends TestCase
             ]);
         $this->assertDatabaseCount('backup_jobs', 1);
     }
+    
+    public function test_delete_specific_backup_job()
+    {
+        $backup_job = BackupJob::factory()->create();
+        $response = $this->deleteJson('api/backup-jobs/'.$backup_job->id);
+
+        $response->assertOk();
+        $this->assertSoftDeleted($backup_job);
+    }
 
     public function test_store_new_backup_job()
     {
