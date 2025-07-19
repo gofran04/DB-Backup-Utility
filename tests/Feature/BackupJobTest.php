@@ -88,5 +88,10 @@ class BackupJobTest extends TestCase
         $response->assertJsonValidationErrors(['db_id']);
     }
 
-   
+    public function test_store_backup_job_with_invalid_db_id()
+    {
+        $response = $this->postJson('api/backup-jobs', ['db_id' => 999]);
+
+        $response->assertStatus(422); 
+    }   
 }
