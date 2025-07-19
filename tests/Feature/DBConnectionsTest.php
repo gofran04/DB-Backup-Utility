@@ -41,7 +41,7 @@ class DBConnectionsTest extends TestCase
             'password'        => 'newuserpass',
         ];
 
-        $response = $this->post('api/database-connections/',$data);
+        $response = $this->postJson('api/database-connections/',$data);
 
         $response->assertStatus(201);
         $this->assertDatabaseCount('database_connections', 1);
@@ -102,6 +102,21 @@ class DBConnectionsTest extends TestCase
         $response = $this->postJson('api/database-connections/',$data);
 
         $response->assertJsonValidationErrorFor('type');
+    }
+
+    public function test_prevent_store_new_db_connection_with_missing_inputs()
+    {
+        $data = [
+            'port'            => 3306,
+            'db_name'         => 'TechFlex',
+            'username'        => 'newuser',
+            'password'        => 'newuserpass',
+        ];
+
+        $response = $this->postJson('api/database-connections/',$data);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['connection_name', 'type', 'host']);
     }
     
 }
