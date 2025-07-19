@@ -7,7 +7,7 @@ use App\Models\DatabaseConnection;
 use App\Exceptions\BackupFailedException;
 use App\Exceptions\DatabaseConnectionException;
 use App\Exceptions\RestoreFailedException;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Crypt;
 
 class MySQLDatabaseAdapter implements DatabaseAdapterInterface
 {
@@ -30,10 +30,12 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
         // Step 1: Generate temporary .cnf file
         $tempCnf = tempnam(sys_get_temp_dir(), 'mycnf_');
 
+        $password = Crypt::decryptString($this->connection->password);
+
         $configg = <<<CNF
         [client]
         user={$this->connection->username}
-        password={$this->connection->password}
+        password={$password}
         host={$this->connection->host}
         port={$this->connection->port}
         CNF;
@@ -100,9 +102,11 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
         
         $tempCnf = tempnam(sys_get_temp_dir(), 'mycnf_');
 
+        $password = Crypt::decryptString($this->connection->password);
+
         file_put_contents($tempCnf, "[client]
             user={$this->connection->username}
-            password=\"{$this->connection->password}\"
+            password=\"{$password}\"
             host={$this->connection->host}
             port={$this->connection->port}");
 
@@ -139,10 +143,12 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
 
     public function testConnection(): bool
     {
+        $password = Crypt::decryptString($this->connection->password);
+
         $cmd = sprintf(
             'mysql -u%s -p%s -h%s -P%s -e "USE %s;"',
             escapeshellarg($this->connection->username),
-            escapeshellarg($this->connection->password),
+            escapeshellarg($password),
             escapeshellarg($this->connection->host),
             $this->connection->port ?? 3306,
             escapeshellarg($this->connection->db_name)
