@@ -53,7 +53,7 @@ class BackupJobTest extends TestCase
             ]);
         $this->assertDatabaseCount('backup_jobs', 1);
     }
-    
+
     public function test_delete_specific_backup_job()
     {
         $backup_job = BackupJob::factory()->create();
@@ -80,7 +80,13 @@ class BackupJobTest extends TestCase
         $this->assertNotEmpty($files);
     }
 
-    
+    public function test_prevent_store_backup_job_with_missing_inputs()
+    {
+        $response = $this->postJson('api/backup-jobs', []);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['db_id']);
+    }
 
    
 }
