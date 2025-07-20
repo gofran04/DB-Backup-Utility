@@ -45,9 +45,8 @@ class DatabaseBackupService
         $connectionName = 'temp_' . uniqid();
         $filename = $connection->db_name.'_'.$connectionName . '_backup_' . now()->format('Ymd_His') . '.sql';
 
-        $storageBase = config('backup.storage_path', storage_path('app/backups'));
-        $relativePath = trim($outputPath, '/') . '/' . $filename;
-        $absolutePath = $storageBase . '/' . $relativePath;
+        $absolutePath = rtrim($outputPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $filename;
+        $relativePath = str_replace(storage_path('app/'), '', $absolutePath);
 
         $sqlFile = $this->adapter->backup($absolutePath);  
 
