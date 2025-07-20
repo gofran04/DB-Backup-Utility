@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'storage_path' => storage_path('app/backups'),
+    'storage_path' => storage_path('app/'),
 ];
