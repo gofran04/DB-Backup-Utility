@@ -36,7 +36,7 @@ class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
         }
     }
 
-    public function backup(string $outputPath)
+    public function backupViaDbId(string $outputPath)
     {
         // Ensure the backup directory exists
         $dir = dirname($outputPath);
@@ -96,13 +96,73 @@ class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
 
             // Write to file only after success
             file_put_contents($outputPath, implode("\n", $output));
-            Log::info("from adapter: " . $outputPath);
             return $outputPath;
         } catch (BackupFailedException $e) {
             // rethrow for upper-level service to handle
             throw $e;        
         }
     }
+
+    public function backupViaProfile(array $profile,string $absolutePath)
+    {
+        $dir = dirname($absolutePath);
+        if (!file_exists($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        // Full pg_dump command
+        $cmd = sprintf(
+            'PGPASSWORD=%s /usr/bin/pg_dump -U %s -h %s -p %s -F p %s 2>&1 > %s',
+            escapeshellarg($profile['password']),
+            escapeshellarg($profile['username']),
+            escapeshellarg($profile['host']),
+            escapeshellarg($profile['port'] ?? '5432'),
+            escapeshellarg($profile['database']),
+            escapeshellarg($absolutePath)
+        );
+
+        $output = [];
+        $exitCode = 0;
+        exec($cmd, $output, $exitCode);
+        $outputText = implode("\n", $output);
+
+        if ($exitCode !== 0) {
+            // Clean up bad file
+            if (file_exists($absolutePath) && filesize($absolutePath) === 0) {
+                @unlink($absolutePath);
+            }
+
+            // Handle specific errors
+            if (
+                stripos($outputText, 'password authentication failed') !== false ||
+                stripos($outputText, 'role "') !== false ||
+                stripos($outputText, 'FATAL:') !== false
+            ) {
+                throw new BackupFailedException('Invalid PostgreSQL credentials or role does not exist.', 'invalid_credentials');
+            }
+
+            if (stripos($outputText, 'command not found') !== false || stripos($outputText, 'pg_dump') !== false && stripos($outputText, 'not found') !== false) {
+                throw new BackupFailedException('pg_dump command not found.', 'pg_dump_missing');
+            }
+
+            if (stripos($outputText, 'permission denied') !== false) {
+                throw new BackupFailedException('Permission denied while writing backup file.', 'permission_denied');
+            }
+
+            if (stripos($outputText, 'no space left') !== false) {
+                throw new BackupFailedException('Insufficient disk space for backup.', 'disk_full');
+            }
+
+            if (stripos($outputText, 'could not connect to server') !== false) {
+                throw new BackupFailedException('PostgreSQL server unreachable.', 'host_unreachable');
+            }
+
+            throw new BackupFailedException("Backup failed: $outputText", 'unknown');
+        }
+
+        return $absolutePath;
+    }
+
 
     public function restore(string $filePath)
     {

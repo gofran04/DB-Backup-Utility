@@ -27,10 +27,17 @@ class AddDBProfile extends Command
 
         $this->info("Creating new profile: $profile ($driver)");
 
+        // Set sensible defaults per driver
+        $defaultPort = match ($driver) {
+            'mysql'                           => 3306,
+            'pgsql', 'postgres', 'postgresql' => 5432,
+        };
+
+        
         $input = [
             'driver'   => $driver,
             'host'     => $this->ask('Database host', '127.0.0.1'),
-            'port'     => $this->ask('Port', 3306),
+            'port'     => $this->ask('Port', $defaultPort),
             'database' => $this->ask('Database name'),
             'username' => $this->ask('Username'),
             'password' => $this->secret('Password'),
