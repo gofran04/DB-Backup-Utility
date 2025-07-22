@@ -37,7 +37,7 @@ class AddDBProfile extends Command
         ];
 
         $validator = Validator::make($input, [
-            'driver'   => 'required|in:mysql,pgsql,sqlite,sqlsrv',
+            'driver'   => 'required|in:mysql,postgresql,pgsql,postgres',
             'host'     => 'required|string',
             'port'     => 'required|numeric',
             'database' => 'required|string',
