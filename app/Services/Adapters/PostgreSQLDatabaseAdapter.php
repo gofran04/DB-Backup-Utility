@@ -13,11 +13,27 @@ use Illuminate\Support\Facades\Crypt;
 
 class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
 {
-    protected DatabaseConnection $connection;
+    protected string $host;
+    protected string $port;
+    protected string $username;
+    protected string $password;
+    protected string $db_name;
 
-    public function __construct(DatabaseConnection $connection)
+    public function __construct(DatabaseConnection|array $connection)
     {
-        $this->connection = $connection;
+        if (is_array($connection)) {
+            $this->host = $connection['host'];
+            $this->port = $connection['port'];
+            $this->username = $connection['username'];
+            $this->password = $connection['password'];// already decrypted
+            $this->db_name = $connection['database'];
+        } else {
+            $this->host = $connection->host;
+            $this->port = $connection->port;
+            $this->username = $connection->username;
+            $this->password = Crypt::decryptString($connection->password);
+            $this->db_name = $connection->db_name;
+        }
     }
 
     public function backup(string $outputPath)
@@ -28,15 +44,13 @@ class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
             mkdir($dir, 0755, true);
         }
 
-        $password = Crypt::decryptString($this->connection->password);
-
         $cmd = sprintf(
             'PGPASSWORD=%s /usr/bin/pg_dump -U %s -h %s -p %d -F p %s 2>&1',
-            escapeshellarg($password),
-            escapeshellarg($this->connection->username),
-            escapeshellarg($this->connection->host),
-            $this->connection->port ?? 5432,
-            escapeshellarg($this->connection->db_name),
+            escapeshellarg($this->password),
+            escapeshellarg($this->username),
+            escapeshellarg($this->host),
+            $this->port ?? 5432,
+            escapeshellarg($this->db_name),
             escapeshellarg($outputPath)
         );
 
@@ -92,15 +106,13 @@ class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
 
     public function restore(string $filePath)
     {
-        $password = Crypt::decryptString($this->connection->password);
-
         $cmd = sprintf(
             'PGPASSWORD=%s /usr/bin/psql -U %s -h %s -p %d -d %s -f %s 2>&1',
-            escapeshellarg($password),
-            escapeshellarg($this->connection->username),
-            escapeshellarg($this->connection->host),
-            $this->connection->port ?? 5432,
-            escapeshellarg($this->connection->db_name),
+            escapeshellarg($this->password),
+            escapeshellarg($this->username),
+            escapeshellarg($this->host),
+            $this->port ?? 5432,
+            escapeshellarg($this->db_name),
             escapeshellarg($filePath)
         );
 
@@ -140,14 +152,12 @@ class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
 
     public function testConnection()
     {
-        $password = Crypt::decryptString($this->connection->password);
-
         $cmd = sprintf(
             'PGPASSWORD=%s pg_isready -U %s -h %s -p %d',
-            escapeshellarg($password),
-            escapeshellarg($this->connection->username),
-            escapeshellarg($this->connection->host),
-            $this->connection->port ?? 5432
+            escapeshellarg($this->password),
+            escapeshellarg($this->username),
+            escapeshellarg($this->host),
+            $this->port ?? 5432
         );
 
         exec($cmd, $output, $exitCode);
