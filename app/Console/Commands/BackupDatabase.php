@@ -8,20 +8,21 @@ use App\Services\DatabaseBackupService;
 use App\Models\DatabaseConnection;
 use App\Exceptions\BackupFailedException;
 use Illuminate\Support\Facades\Log;
+use App\Factories\DatabaseAdapterFactory;
+use App\Services\Compression\CompressionServiceInterface;
 
 class BackupDatabase extends Command
 {
-    // protected $signature = 'db:backup {client_id}';
     protected $signature = 'db:backup {id?} {--profile=}';
     protected $description = 'Backup The Database';
 
-    protected DatabaseBackupService $backupService;
     protected ConfigService $configService;
 
-    public function __construct(DatabaseBackupService $backupService, ConfigService $configService)
+    public function __construct( ConfigService $configService)
     {
+        // NOTE: Cannot inject DatabaseBackupService in constructor because
+        // it depends on a runtime-specific adapter (resolved after knowing the DB type).
         parent::__construct();
-        $this->backupService = $backupService;
         $this->configService = $configService;
     }
 
@@ -30,7 +31,7 @@ class BackupDatabase extends Command
     {
         $id = $this->argument('id');
         $profileName = $this->option('profile');
-        $outputPath = 'backups'; // Directory where backups will be stored
+        $outputPath = config('backup.storage_path') . '/backups'; // Directory where backups will be stored
 
         // Ensure one of the options is provided
         if (!$id && !$profileName) {
@@ -61,7 +62,12 @@ class BackupDatabase extends Command
                 }
 
                 $dbConfig = $profiles[$profileName];
-                $result = $this->backupService->backupUsingProfile($dbConfig, $outputPath);
+                           
+                $adapter = (new DatabaseAdapterFactory())->makeFromProfile($dbConfig);
+                $compressor = app(CompressionServiceInterface::class);
+                $backupService = new DatabaseBackupService($adapter, $compressor);
+
+                $result = $backupService->backupUsingProfile($dbConfig, $outputPath); // assuming this method exists
             }
             else // Handle ID-based backup
             {
@@ -78,7 +84,11 @@ class BackupDatabase extends Command
                     return Command::FAILURE;
                 }
 
-                $result = $this->backupService->backup($id, $outputPath);
+                $adapter = (new DatabaseAdapterFactory())->make($connection);
+                $compressor = app(CompressionServiceInterface::class);
+                $backupService = new DatabaseBackupService($adapter, $compressor);
+
+                $result = $backupService->backup($connection, $outputPath);
             }
 
             $duration = now()->diffInSeconds($logContext['invoked_at']);
