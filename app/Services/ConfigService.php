@@ -56,4 +56,10 @@ class ConfigService
         $data = ['profiles' => $profiles];
         File::put($this->configPath, json_encode($data, JSON_PRETTY_PRINT));
     }
+
+    public function getProfile(string $name): ?array
+    {
+        $profiles = $this->loadProfiles();
+        return $profiles[$name] ?? null;
+    }
 }
