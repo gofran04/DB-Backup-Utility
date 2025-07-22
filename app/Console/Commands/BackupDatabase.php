@@ -95,12 +95,12 @@ class BackupDatabase extends Command
 
             // Handle success response
             $this->info("✅ Backup successful!");
-            $this->line("📁 File Path: storage/app/{$result['file_path']}");
+            $this->line("📁 File Path: storage/app{$result['relative_path']}");
             $this->line("📦 Size: {$result['file_size']} bytes");
 
             //log after backup operation success
             Log::info("✅ CLI Backup Success", array_merge($logContext, [
-                'file_path' => $result['file_path'],
+                'file_path' => $result['relative_path'],
                 'file_size' => $result['file_size'],
                 'duration'  => $duration,
             ]));
