@@ -67,7 +67,7 @@ class BackupDatabase extends Command
                 $compressor = app(CompressionServiceInterface::class);
                 $backupService = new DatabaseBackupService($adapter, $compressor);
 
-                $result = $backupService->backupUsingProfile($dbConfig, $outputPath); // assuming this method exists
+                $result = $backupService->backupUsingProfile($dbConfig, $outputPath); // assuming this method exists            
             }
             else // Handle ID-based backup
             {
@@ -88,7 +88,7 @@ class BackupDatabase extends Command
                 $compressor = app(CompressionServiceInterface::class);
                 $backupService = new DatabaseBackupService($adapter, $compressor);
 
-                $result = $backupService->backup($connection, $outputPath);
+                $result = $backupService->backupUsingDbId($connection, $outputPath);
             }
 
             $duration = now()->diffInSeconds($logContext['invoked_at']);

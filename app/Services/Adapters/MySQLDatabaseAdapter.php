@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Crypt;
 
 class MySQLDatabaseAdapter implements DatabaseAdapterInterface
 {
-
     protected string $host;
     protected string $port;
     protected string $username;
@@ -35,7 +34,7 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
         }
     }
 
-    public function backup(string $absolutePath)
+    public function backupViaDbId(string $absolutePath)
     {
         // Ensure the backup directory exists
         $dir = dirname($absolutePath);
@@ -103,6 +102,56 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
 
         } catch (BackupFailedException $e) {
             // rethrow for upper-level service to handle
+            throw $e;
+        }
+    }
+
+    public function backupViaProfile(array $profile,string $absolutePath)
+    {
+        $command = sprintf(
+            'mysqldump --user=%s --password=%s --host=%s --port=%s %s 2>&1 > %s',
+            escapeshellarg($profile['username']),
+            escapeshellarg($profile['password']),
+            escapeshellarg($profile['host']),
+            escapeshellarg($profile['port'] ?? '3306'),
+            escapeshellarg($profile['database']),
+            escapeshellarg($absolutePath)
+        );
+
+        $output = [];
+        $result = 0;
+        try{
+            exec($command, $output, $result);
+            $outputText = implode("\n", $output);
+
+            if ($result !== 0) {
+                // same error checks as before
+                if (stripos($outputText, 'access denied') !== false) {
+                    throw new BackupFailedException('Invalid database credentials.', 'invalid_credentials');
+                }
+                if (stripos($outputText, 'mysqldump') !== false && stripos($outputText, 'not found') !== false) {
+                    throw new BackupFailedException('mysqldump command not found.', 'mysqldump_missing');
+                }
+                if (stripos($outputText, 'permission denied') !== false) {
+                    throw new BackupFailedException('Permission denied while writing backup file.', 'permission_denied');
+                }
+                if (stripos($outputText, 'no space left') !== false) {
+                    throw new BackupFailedException('Insufficient disk space for backup.', 'disk_full');
+                }
+                if (stripos($outputText, 'timed out') !== false) {
+                    throw new BackupFailedException('Database backup operation timed out.', 'timeout');
+                }
+                if (stripos($outputText, 'unknown mysql server host') !== false) {
+                    throw new BackupFailedException('Unknown MySQL server host.', 'host_unreachable');
+                }
+                if (stripos($outputText, "can't connect to mysql server") !== false) {
+                    throw new BackupFailedException('Cannot connect to MySQL server on the specified host.', 'host_unreachable');
+                }
+
+                throw new BackupFailedException("Backup failed: $outputText", 'unknown');
+            }
+            return $absolutePath;
+        } catch (BackupFailedException $e) {
             throw $e;
         }
     }
