@@ -18,4 +18,13 @@ class DatabaseAdapterFactory
             default => throw new InvalidArgumentException("Unsupported database type: {$connection->type}")
         };
     }
+
+    public function makeFromProfile(array $profile): DatabaseAdapterInterface
+    {
+        return match (strtolower($profile['driver'])) {
+            'mysql' => new MySQLDatabaseAdapter($profile),
+            'pgsql', 'postgres', 'postgresql' => new PostgreSQLDatabaseAdapter($profile),
+            default => throw new \InvalidArgumentException("Unsupported database type: {$profile['type']}")
+        };
+    }
 }
