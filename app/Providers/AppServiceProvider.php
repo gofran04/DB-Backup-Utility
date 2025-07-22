@@ -16,7 +16,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(DatabaseAdapterInterface::class,MySQLDatabaseAdapter::class);
         $this->app->bind(CompressionServiceInterface::class,GzipCompressionService::class);
         $this->app->bind( DecompressionServiceInterface::class,GzipCompressionService::class);
     }

@@ -12,11 +12,27 @@ use Illuminate\Support\Facades\Crypt;
 class MySQLDatabaseAdapter implements DatabaseAdapterInterface
 {
 
-    protected DatabaseConnection $connection;
+    protected string $host;
+    protected string $port;
+    protected string $username;
+    protected string $password;
+    protected string $db_name;
 
-    public function __construct(DatabaseConnection $connection)
+    public function __construct(DatabaseConnection|array $connection)
     {
-        $this->connection = $connection;
+        if (is_array($connection)) {
+            $this->host = $connection['host'];
+            $this->port = $connection['port'];
+            $this->username = $connection['username'];
+            $this->password = $connection['password'];// already decrypted
+            $this->db_name = $connection['database'];
+        } else {
+            $this->host = $connection->host;
+            $this->port = $connection->port;
+            $this->username = $connection->username;
+            $this->password = Crypt::decryptString($connection->password);
+            $this->db_name = $connection->db_name;
+        }
     }
 
     public function backup(string $absolutePath)
@@ -30,14 +46,12 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
         // Step 1: Generate temporary .cnf file
         $tempCnf = tempnam(sys_get_temp_dir(), 'mycnf_');
 
-        $password = Crypt::decryptString($this->connection->password);
-
         $configg = <<<CNF
         [client]
-        user={$this->connection->username}
-        password={$password}
-        host={$this->connection->host}
-        port={$this->connection->port}
+        user={$this->username}
+        password={$this->password}
+        host={$this->host}
+        port={$this->port}
         CNF;
 
         file_put_contents($tempCnf, $configg);
@@ -45,7 +59,7 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
         $command = sprintf(
             'mysqldump --defaults-extra-file=%s %s 2>&1 > %s',
             escapeshellarg($tempCnf),
-            escapeshellarg($this->connection->db_name),
+            escapeshellarg($this->db_name),
             escapeshellarg($absolutePath)
         );
 
@@ -102,18 +116,16 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
         
         $tempCnf = tempnam(sys_get_temp_dir(), 'mycnf_');
 
-        $password = Crypt::decryptString($this->connection->password);
-
         file_put_contents($tempCnf, "[client]
-            user={$this->connection->username}
-            password=\"{$password}\"
-            host={$this->connection->host}
-            port={$this->connection->port}");
+            user={$this->username}
+            password=\"{$this->password}\"
+            host={$this->host}
+            port={$this->port}");
 
         $command = sprintf(
             'mysql --defaults-extra-file=%s %s < %s 2>&1',
             escapeshellarg($tempCnf),
-            escapeshellarg($this->connection->db_name),
+            escapeshellarg($this->db_name),
             escapeshellarg($filePath)
         );
 
@@ -143,15 +155,13 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
 
     public function testConnection(): bool
     {
-        $password = Crypt::decryptString($this->connection->password);
-
         $cmd = sprintf(
             'mysql -u%s -p%s -h%s -P%s -e "USE %s;"',
-            escapeshellarg($this->connection->username),
-            escapeshellarg($password),
-            escapeshellarg($this->connection->host),
+            escapeshellarg($this->username),
+            escapeshellarg($this->password),
+            escapeshellarg($this->host),
             $this->connection->port ?? 3306,
-            escapeshellarg($this->connection->db_name)
+            escapeshellarg($this->db_name)
         );
 
         exec($cmd . ' 2>&1', $output, $exitCode);

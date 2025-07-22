@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Services\ConfigService;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Crypt;
 
 class AddDBProfile extends Command
 {
@@ -51,6 +52,9 @@ class AddDBProfile extends Command
             }
             return 1;
         }
+
+        // Encrypt the password before storing it
+        $input['password'] = Crypt::encryptString($input['password']);
 
         $profiles = $this->configService->loadProfiles();
 

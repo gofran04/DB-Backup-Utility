@@ -58,7 +58,8 @@ class BackupJobController extends Controller
             
             // Run backup
             $backupService = new DatabaseBackupService($adapter,$compressor);
-            $backupResult = $backupService->backup($db_connection, 'backups');// pass the absolute path 
+            $path = config('backup.storage_path') . '/backups';
+            $backupResult = $backupService->backup($db_connection, $path);// pass the absolute path 
            
             $backupJob->update([ // Update job record with success
                 'status'       => 'completed',

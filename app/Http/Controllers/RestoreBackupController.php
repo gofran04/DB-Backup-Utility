@@ -12,7 +12,6 @@ use App\Traits\ApiResponseTrait;
 use App\Services\Compression\DecompressionServiceInterface;
 use Symfony\Component\HttpFoundation\Response;
 
-
 class RestoreBackupController extends Controller
 {
     use ApiResponseTrait;
@@ -20,12 +19,6 @@ class RestoreBackupController extends Controller
     function restoreBackup(RestoreBackupRequest $request)
     {
         $validated = $request->validated();
-        $connection = DatabaseConnection::findOrFail($validated['db_id']);
-
-        // Use factory to resolve correct adapter
-        $adapterFactory = new DatabaseAdapterFactory();
-        $adapter = $adapterFactory->make($connection);
-
 
         $filePath = null;
         $pathToBackupFile = $validated['file'];
@@ -44,12 +37,25 @@ class RestoreBackupController extends Controller
                     Response::HTTP_UNPROCESSABLE_ENTITY
                 );
             }
-            
         } else {
             $filePath = $pathToBackupFile;
         }
-
         $validated['file'] = $filePath;
+
+        // Use factory to resolve correct adapter
+        $adapterFactory = new DatabaseAdapterFactory();
+        $adapter = null;
+        if (isset($validated['db_id'])) 
+        {
+            $connection = DatabaseConnection::findOrFail($validated['db_id']);
+            $adapter = $adapterFactory->make($connection);
+        } elseif (isset($validated['db_profile'])) {
+            $profileName = $request->input('db_profile'); 
+            $configService = new ConfigService();
+            $profile = $configService->getProfile($profileName);
+            $adapter = $adapterFactory->makeFromProfile($profile);
+        }
+
         $restore_service = new RestoreBackupService(new ConfigService(), $adapter);
         
         try{// Run restore operation
