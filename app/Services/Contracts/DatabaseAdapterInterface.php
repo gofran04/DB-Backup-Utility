@@ -4,7 +4,9 @@ namespace App\Services\Contracts;
 
 interface DatabaseAdapterInterface
 {
-    public function backup(String $outputPath);
+    public function backupViaDbId(String $outputPath);
+
+    public function backupViaProfile(array $profile,string $outputPath);
 
     public function testConnection();
 

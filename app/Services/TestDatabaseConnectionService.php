@@ -78,19 +78,19 @@ class TestDatabaseConnectionService
         }
     }
 
-    public static function testProfileConnection(array $config)
+    public static function testProfileConnection(array $profile)
     {
         $connectionName = 'profile_' . uniqid();
 
         \Illuminate\Support\Facades\DB::purge($connectionName);
 
         \Illuminate\Support\Facades\Config::set("database.connections.{$connectionName}", [
-            'driver'    => $config['driver'] ?? 'mysql',
-            'host'      => $config['host'],
-            'port'      => $config['port'],
-            'database'  => $config['database'],
-            'username'  => $config['username'],
-            'password'  => $config['password'],
+            'driver'    => $profile['driver'] ?? 'mysql',
+            'host'      => $profile['host'],
+            'port'      => $profile['port'],
+            'database'  => $profile['database'],
+            'username'  => $profile['username'],
+            'password'  => $profile['password'],
             'charset'   => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix'    => '',
