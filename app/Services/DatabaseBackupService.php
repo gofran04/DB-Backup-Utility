@@ -80,7 +80,7 @@ class DatabaseBackupService
         $absolutePath = rtrim($outputPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $filename;
         $relativePath = str_replace(storage_path('app/'), '', $absolutePath);
 
-        $dumplFile = $this->adapter->backupViaProfile($profile,$absolutePath);
+        $dumplFile = $this->adapter->backupViaProfile($absolutePath);
         
         try { // compress dump file
             $gzFile = $this->compressor->compress($dumplFile, level: 6);

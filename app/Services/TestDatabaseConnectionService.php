@@ -6,6 +6,7 @@ use App\Traits\ApiResponseTrait;
 use App\Models\DatabaseConnection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Crypt;
 
 class TestDatabaseConnectionService
 {
@@ -95,9 +96,10 @@ class TestDatabaseConnectionService
             'port'     => $profile['port'],
             'database' => $profile['database'],
             'username' => $profile['username'],
-            'password' => $profile['password'],
+            'password' => Crypt::decryptString($profile['password']),
             'prefix'   => '',
         ];
+                    \Illuminate\Support\Facades\Log::info("D: {$config['password']}");
 
         if ($driver === 'mysql') {
             $config += [

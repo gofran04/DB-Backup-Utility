@@ -24,7 +24,7 @@ class DatabaseAdapterFactory
         return match (strtolower($profile['driver'])) {
             'mysql' => new MySQLDatabaseAdapter($profile),
             'pgsql', 'postgres', 'postgresql' => new PostgreSQLDatabaseAdapter($profile),
-            default => throw new \InvalidArgumentException("Unsupported database type: {$profile['type']}")
+            default => throw new \InvalidArgumentException("Unsupported database type: {$profile['driver']}")
         };
     }
 }

@@ -6,7 +6,7 @@ interface DatabaseAdapterInterface
 {
     public function backupViaDbId(String $outputPath);
 
-    public function backupViaProfile(array $profile,string $outputPath);
+    public function backupViaProfile(string $outputPath);
 
     public function testConnection();
 
