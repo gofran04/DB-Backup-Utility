@@ -25,7 +25,7 @@ class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
             $this->host = $connection['host'];
             $this->port = $connection['port'];
             $this->username = $connection['username'];
-            $this->password = $connection['password'];// already decrypted
+            $this->password = Crypt::decryptString($connection['password']);
             $this->db_name = $connection['database'];
         } else {
             $this->host = $connection->host;
@@ -103,7 +103,7 @@ class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
         }
     }
 
-    public function backupViaProfile(array $profile,string $absolutePath)
+    public function backupViaProfile(string $absolutePath)
     {
         $dir = dirname($absolutePath);
         if (!file_exists($dir)) {
@@ -113,11 +113,11 @@ class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
         // Full pg_dump command
         $cmd = sprintf(
             'PGPASSWORD=%s /usr/bin/pg_dump -U %s -h %s -p %s -F p %s 2>&1 > %s',
-            escapeshellarg($profile['password']),
-            escapeshellarg($profile['username']),
-            escapeshellarg($profile['host']),
-            escapeshellarg($profile['port'] ?? '5432'),
-            escapeshellarg($profile['database']),
+            escapeshellarg($this->password),
+            escapeshellarg($this->username),
+            escapeshellarg($this->host),
+            escapeshellarg($this->port),
+            escapeshellarg($this->db_name),
             escapeshellarg($absolutePath)
         );
 

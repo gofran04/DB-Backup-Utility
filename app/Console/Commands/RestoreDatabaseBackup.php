@@ -83,7 +83,7 @@ class RestoreDatabaseBackup extends Command
             ];
         }
 
-        if(($config['driver'] == 'postgres') || ($config['driver'] == 'postgressql'))
+        if(($config['driver'] == 'postgres') || ($config['driver'] == 'postgresql'))
             $config['driver'] = 'pgsql'; // laravel expect only 'pgsql'
 
         if (!empty($config['password'])) {

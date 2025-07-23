@@ -23,7 +23,7 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
             $this->host = $connection['host'];
             $this->port = $connection['port'];
             $this->username = $connection['username'];
-            $this->password = $connection['password'];// already decrypted
+            $this->password = Crypt::decryptString($connection['password']);
             $this->db_name = $connection['database'];
         } else {
             $this->host = $connection->host;
@@ -106,15 +106,20 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
         }
     }
 
-    public function backupViaProfile(array $profile,string $absolutePath)
+    public function backupViaProfile(string $absolutePath)
     {
+        // Ensure the backup directory exists
+        $dir = dirname($absolutePath);
+        if (!file_exists($dir)) {
+            mkdir($dir, 0755, true);
+        }
         $command = sprintf(
             'mysqldump --user=%s --password=%s --host=%s --port=%s %s 2>&1 > %s',
-            escapeshellarg($profile['username']),
-            escapeshellarg($profile['password']),
-            escapeshellarg($profile['host']),
-            escapeshellarg($profile['port'] ?? '3306'),
-            escapeshellarg($profile['database']),
+            escapeshellarg($this->username),
+            escapeshellarg($this->password),
+            escapeshellarg($this->host),
+            escapeshellarg($this->port),
+            escapeshellarg($this->db_name),
             escapeshellarg($absolutePath)
         );
 
