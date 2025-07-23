@@ -6,6 +6,8 @@ use Illuminate\Console\Command;
 use App\Services\ConfigService;
 use Illuminate\Support\Facades\File;
 use App\Models\DatabaseConnection;
+use Illuminate\Support\Facades\Crypt;
+
 
 class RestoreDatabaseBackup extends Command
 {
@@ -32,19 +34,24 @@ class RestoreDatabaseBackup extends Command
             return Command::FAILURE;
         }
 
-        // ✅ Normalize file path
-        if (!str_starts_with($file, '/') && !preg_match('/^[A-Z]:\\\\/', $file)) {
-            $file = base_path($file);
-        }
-
-        if (!file_exists($file)) {
+        // ✅ Clean file path resolution (absolute, base_path, storage/app)
+        if (file_exists($file)) {
+            $resolvedPath = $file;
+        } elseif (file_exists(base_path($file))) {
+            $resolvedPath = base_path($file);
+        } elseif (file_exists(storage_path("app/{$file}"))) {
+            $resolvedPath = storage_path("app/{$file}");
+        } else {
             $this->error("❌ Backup file not found: $file");
             return Command::FAILURE;
         }
 
+        $file = $resolvedPath;
+
         $config = null;
 
-        if ($profile) {  // Load DB  from config file (via profile)
+        if ($profile) 
+        {
             $this->info("🔍 Loading DB config from profile: $profile");
             $profiles = $this->configService->loadProfiles();
 
@@ -56,7 +63,8 @@ class RestoreDatabaseBackup extends Command
             $config = $profiles[$profile];
         }
 
-        if ($id) { // Load DB  from Database (via id)
+        if ($id) 
+        {
             $this->info("🔍 Loading DB config from database_connections table (ID: $id)");
             $connection = DatabaseConnection::find($id);
 
@@ -75,24 +83,58 @@ class RestoreDatabaseBackup extends Command
             ];
         }
 
-        // ✅ Validate driver
-        if (!isset($config['driver']) || $config['driver'] !== 'mysql') {
-            $this->error("❌ Only MySQL driver is supported for restore at this time.");
-            return Command::FAILURE;
-        }
+        if(($config['driver'] == 'postgres') || ($config['driver'] == 'postgressql'))
+            $config['driver'] = 'pgsql'; // laravel expect only 'pgsql'
 
+        if (!empty($config['password'])) {
+                try {
+                    $config['password'] = Crypt::decryptString($config['password']);
+                } catch (\Exception $e) {
+                    $this->error("❌ Failed to decrypt password in profile: " . $e->getMessage());
+                    return Command::FAILURE;
+                }
+            }
         $this->info("🔧 Starting restore operation for database: {$config['database']}");
 
         // ✅ Build restore command
-        $command = sprintf(
-            'mysql -h%s -P%s -u%s -p%s %s < %s',
-            escapeshellarg($config['host']),
-            escapeshellarg($config['port'] ?? '3306'),
-            escapeshellarg($config['username']),
-            escapeshellarg($config['password']),
-            escapeshellarg($config['database']),
-            escapeshellarg($file)
-        );
+        $command = null;
+        switch ($config['driver']) {
+            case 'mysql':
+                $tempCnf = tempnam(sys_get_temp_dir(), 'mycnf');
+                $configContent = <<<EOF
+                [client]
+                user={$config['username']}
+                password="{$config['password']}"
+                host={$config['host']}
+                port={$config['port']}
+                EOF;
+
+                file_put_contents($tempCnf, $configContent);
+
+                $command = sprintf(
+                    'mysql --defaults-extra-file=%s %s < %s > /dev/null 2>&1',
+                    escapeshellarg($tempCnf),
+                    escapeshellarg($config['database']),
+                    escapeshellarg($file)
+                );
+                break;
+
+            case 'pgsql':
+                putenv("PGPASSWORD={$config['password']}"); // hide password from CLI
+                $command = sprintf(
+                    'psql -h %s -p %s -U %s -d %s -f %s > /dev/null 2>&1',
+                    escapeshellarg($config['host']),
+                    escapeshellarg($config['port']),
+                    escapeshellarg($config['username']),
+                    escapeshellarg($config['database']),
+                    escapeshellarg($file)
+                );
+                break;
+
+            default:
+                $this->error("❌ Unsupported driver: {$config['driver']}");
+                return Command::FAILURE;
+        }
 
         $this->info("🚀 Running restore command...");
         $exitCode = null;
@@ -106,6 +148,4 @@ class RestoreDatabaseBackup extends Command
         $this->error("❌ Restore failed with exit code: $exitCode");
         return Command::FAILURE;
     }
-
-
 }
