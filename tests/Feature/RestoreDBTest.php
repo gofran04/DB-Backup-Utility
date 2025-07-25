@@ -181,5 +181,18 @@ class RestoreDBTest extends TestCase
         ]);
     }
 
+    public function test_restore_fails_with_invalid_db_id()
+    {
+        $data = [
+            'db_id' => 99999, // invalid db_id
+            'file'  => 'file.sql'
+        ];
 
+        $response = $this->postJson('api/restore', $data);
+        
+        $response->assertStatus(422); // or whatever your handler returns
+        $response->assertJsonFragment([
+            'message' => 'The selected db id is invalid.',
+        ]);
+    }
 }
