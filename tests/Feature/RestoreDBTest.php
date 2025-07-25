@@ -146,5 +146,24 @@ class RestoreDBTest extends TestCase
         ]);
     }
 
+    public function test_restore_fails_when_dump_file_not_exist()
+    {
+        $db_connection = DatabaseConnection::factory()->create();
+
+        $data = [
+            'db_id' => $db_connection->id,
+            'file'  => 'not_found_file.sql'
+        ];
+
+        $response = $this->postJson('api/restore',$data);
+
+        $this->assertFalse(file_exists($data['file']));
+        $response->assertJsonFragment([
+            'errors' => [
+                'message' => "Backup file not found: " .  storage_path("app/{$data['file']}"),
+            ],
+        ]);
+    }
+
 
 }
