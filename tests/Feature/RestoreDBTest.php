@@ -6,10 +6,12 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 use App\Models\DatabaseConnection;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Config;
 use App\Services\DatabaseBackupService;
 use App\Factories\DatabaseAdapterFactory;
 use App\Services\Compression\CompressionServiceInterface;
+use App\Services\ConfigService;
+use Illuminate\Support\Facades\Crypt;
+
 
 class RestoreDBTest extends TestCase
 {
@@ -64,5 +66,52 @@ class RestoreDBTest extends TestCase
         $this->assertNotNull($fullPath, 'Backup path should not be null');
         $this->assertTrue(file_exists($fullPath), "Backup file does not exist: $fullPath");
     }
+
+    public function test_restore_db_by_profile()
+    {
+        $db_connection = DatabaseConnection::factory()->create();
+
+        $compressor = app(CompressionServiceInterface::class);
+        $adapter = app(DatabaseAdapterFactory::class)->make($db_connection);
+
+        $backupService = new DatabaseBackupService($adapter,$compressor);
+        $backupJob = $backupService->backupUsingDbId($db_connection, $this->storagePath);
+
+        $fullPath = storage_path('app/' . $backupJob['relative_path']);
+
+        // add new profile to config.json for testing
+        $configService = app(ConfigService::class);
+        $profiles = $configService->loadProfiles();
+
+        $profiles['prof_temp'] = [
+            'driver'   => 'mysql',
+            'host'     => '127.0.0.1',
+            'port'     => 3306,
+            'database' => 'testrestore',
+            'username' => 'newuser',
+            'password' => Crypt::encryptString('newuserpass'), 
+        ];
+
+        $configService->saveProfiles($profiles);
+
+        $data2 = [
+            'db_profile' => 'prof_temp', 
+            'file'       => $backupJob['relative_path']
+        ];
+
+        $response = $this->post('api/restore',$data2);
+
+        //cleanup config.json by removing profile:prof_temp
+        unset($profiles['prof_temp']);
+        $configService->saveProfiles($profiles);
+        
+        $response->assertOk();
+        $response->assertJson([
+            'message' => 'Database restored successfully.',
+        ]);
+        $this->assertNotNull($fullPath, 'Backup path should not be null');
+        $this->assertTrue(file_exists($fullPath), "Backup file does not exist: $fullPath");
+    }
+
 
 }
