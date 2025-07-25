@@ -12,7 +12,6 @@ use App\Services\Compression\CompressionServiceInterface;
 use App\Services\ConfigService;
 use Illuminate\Support\Facades\Crypt;
 
-
 class RestoreDBTest extends TestCase
 {
     use DatabaseMigrations;
@@ -89,7 +88,7 @@ class RestoreDBTest extends TestCase
             'port'     => 3306,
             'database' => 'testrestore',
             'username' => 'newuser',
-            'password' => Crypt::encryptString('newuserpass'), 
+            'password' => Crypt::encryptString(env('TEST_DB_PASSWORD')), 
         ];
 
         $configService->saveProfiles($profiles);
