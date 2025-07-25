@@ -112,5 +112,24 @@ class RestoreDBTest extends TestCase
         $this->assertTrue(file_exists($fullPath), "Backup file does not exist: $fullPath");
     }
 
+    public function test_restore_fails_when_both_id_and_profile_provided()
+    {
+        $db_connection = DatabaseConnection::factory()->create();
+
+        $data2 = [
+            'db_profile' => 'some_profile', 
+            'db_id'      => $db_connection->id,
+            'file'       => 'file.sql'
+        ];
+
+        $response = $this->postJson('api/restore',$data2);
+
+        $response->assertStatus(422); // Laravel returns 422 on validation failure
+        $response->assertJsonValidationErrors(['id_profile']);
+        $response->assertJsonFragment([
+            'id_profile' => ['Provide either db_profile or db_id, not both.']
+        ]);
+    }
+
 
 }
