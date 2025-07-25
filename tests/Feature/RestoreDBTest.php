@@ -48,7 +48,7 @@ class RestoreDBTest extends TestCase
         $adapter = app(DatabaseAdapterFactory::class)->make($db_connection);
 
         $backupService = new DatabaseBackupService($adapter,$compressor);
-        $backupJob = $backupService->backup($db_connection, $this->storagePath);
+        $backupJob = $backupService->backupUsingDbId($db_connection, $this->storagePath);
 
         $fullPath = storage_path('app/' . $backupJob['relative_path']);
         $data2 = [
