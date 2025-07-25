@@ -57,7 +57,7 @@ class RestoreDBTest extends TestCase
             'file'  => $backupJob['relative_path']
         ];
 
-        $response = $this->post('api/restore',$data2);
+        $response = $this->postJson('api/restore',$data2);
         $response->assertOk();
         $response->assertJson([
             'message' => 'Database restored successfully.',
@@ -98,7 +98,7 @@ class RestoreDBTest extends TestCase
             'file'       => $backupJob['relative_path']
         ];
 
-        $response = $this->post('api/restore',$data2);
+        $response = $this->postJson('api/restore',$data2);
 
         //cleanup config.json by removing profile:prof_temp
         unset($profiles['prof_temp']);
