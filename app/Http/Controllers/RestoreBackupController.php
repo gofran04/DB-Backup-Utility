@@ -53,6 +53,14 @@ class RestoreBackupController extends Controller
             $profileName = $request->input('db_profile'); 
             $configService = new ConfigService();
             $profile = $configService->getProfile($profileName);
+            if (!$profile) {
+                 return $this->errorResponse(
+                    'Restore DB failed',
+                    [
+                        'message' => 'Profile: '. $profileName. ' not found',
+                    ],404);
+            }
+
             $adapter = $adapterFactory->makeFromProfile($profile);
         }
 

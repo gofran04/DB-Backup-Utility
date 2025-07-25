@@ -195,4 +195,21 @@ class RestoreDBTest extends TestCase
             'message' => 'The selected db id is invalid.',
         ]);
     }
+
+    public function test_restore_fails_with_invalid_profile()
+    {
+        $data = [
+            'db_profile' => 'nonexistent_profile',
+            'file'       => 'file.sql'
+        ];
+
+        $response = $this->postJson('api/restore', $data);
+        
+        $response->assertStatus(404);
+        $response->assertJsonFragment([
+            'errors' => [
+                'message' => 'Profile: '. $data['db_profile']. ' not found',
+            ]
+        ]);
+    }
 }
