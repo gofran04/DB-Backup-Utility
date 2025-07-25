@@ -42,7 +42,7 @@ class RestoreDBTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_retore_db_by_passing_db_id()
+    public function test_restore_db_by_passing_db_id()
     {
         $db_connection = DatabaseConnection::factory()->create();
 
