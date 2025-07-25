@@ -165,5 +165,21 @@ class RestoreDBTest extends TestCase
         ]);
     }
 
+    public function test_restore_fails_if_file_not_provided()
+    {
+        $db_connection = DatabaseConnection::factory()->create();
+
+        $data = [
+            'db_id' => $db_connection->id,
+        ];
+
+        $response = $this->postJson('api/restore',$data);
+
+        $response->assertStatus(422);
+        $response->assertJson([
+            'message' => 'The file field is required.',
+        ]);
+    }
+
 
 }
