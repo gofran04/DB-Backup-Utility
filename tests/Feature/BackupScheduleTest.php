@@ -58,6 +58,17 @@ class BackupScheduleTest extends TestCase
             'frequency'        => $frequency,
             'db_connection_id' => $db_connection->id, 
         ]);
+        $response->assertJsonStructure([
+            'data' => [
+                'id',
+                'db_connection_id',
+                'frequency',
+                'cron_expression',
+                'enabled',
+                'created_at',
+                'updated_at',
+            ]
+        ]);
     }
 
     public function test_update_specific_schedule()
