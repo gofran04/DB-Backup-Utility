@@ -81,4 +81,16 @@ class BackupScheduleTest extends TestCase
             'frequency'        => $frequency,
         ]);
     }
+
+    public function test_delete_specific_schedule()
+    {
+        $schedule = BackupSchedule::factory()->create();
+        $response = $this->deleteJson('api/backup-schedules/'.$schedule->id);
+
+        $this->assertSoftDeleted($schedule);
+        $response->assertStatus(200);
+        $response->assertJson([
+            "message" => "Task Schedule deleted successfully.",
+        ]);
+    }
 }
