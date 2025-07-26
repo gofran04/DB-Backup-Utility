@@ -137,4 +137,11 @@ class BackupScheduleTest extends TestCase
             'message'    => 'The selected db connection id is invalid.',
         ]);
     }
+
+    public function test_show_nonexistent_schedule_returns_404()
+    {
+        $response = $this->getJson('api/backup-schedules/999999');
+
+        $response->assertStatus(404);
+    }
 }
