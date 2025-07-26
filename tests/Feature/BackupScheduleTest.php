@@ -6,6 +6,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\BackupSchedule;
+use App\Enums\ScheduleFrequency;
+use App\Models\DatabaseConnection;
 
 class BackupScheduleTest extends TestCase
 {
@@ -35,6 +37,26 @@ class BackupScheduleTest extends TestCase
             ]);
     }
 
-    
-    
+    public function test_store_new_schedule()
+    {
+        $frequency = fake()->randomElement(array_keys(ScheduleFrequency::OPTIONS));
+        $db_connection = DatabaseConnection::factory()->create();
+        $data = [
+            'db_connection_id' => $db_connection->id, 
+            'frequency'        => $frequency,
+            'cron_expression'  => ScheduleFrequency::OPTIONS[$frequency],
+            'enabled'          => true
+        ];
+
+        $response = $this->postJson('api/backup-schedules/',$data);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseCount('backup_schedules', 1);
+        $this->assertDatabaseHas('backup_schedules', [
+            'db_connection_id' => $db_connection->id, 
+        ]);
+        $response->assertJsonFragment([
+            'frequency'        => $frequency,
+        ]);
+    }
 }
