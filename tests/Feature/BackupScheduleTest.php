@@ -20,6 +20,21 @@ class BackupScheduleTest extends TestCase
         $this->assertDatabaseCount('backup_schedules', 8);
     }
 
+    public function test_return_specific_schedule()
+    {
+        $schedule = BackupSchedule::factory()->create();
+        $response = $this->getJson('api/backup-schedules/'.$schedule->id);
+
+        $response->assertOk();
+        $this->assertDatabaseCount('backup_schedules', 1);
+
+        $response->assertJson([
+                'data' => [
+                    'id' => $schedule->id,
+                ],
+            ]);
+    }
+
     
     
 }
