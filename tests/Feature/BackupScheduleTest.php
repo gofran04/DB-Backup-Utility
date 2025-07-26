@@ -11,7 +11,7 @@ use App\Models\DatabaseConnection;
 
 class BackupScheduleTest extends TestCase
 {
-    // use RefreshDatabase;
+    use RefreshDatabase;
 
     public function test_return_all_db_schedules()
     {
@@ -44,19 +44,19 @@ class BackupScheduleTest extends TestCase
         $data = [
             'db_connection_id' => $db_connection->id, 
             'frequency'        => $frequency,
-            'cron_expression'  => ScheduleFrequency::OPTIONS[$frequency],
             'enabled'          => true
         ];
 
         $response = $this->postJson('api/backup-schedules/',$data);
-
         $response->assertStatus(201);
         $this->assertDatabaseCount('backup_schedules', 1);
         $this->assertDatabaseHas('backup_schedules', [
             'db_connection_id' => $db_connection->id, 
+            'frequency'        => $frequency,
         ]);
         $response->assertJsonFragment([
             'frequency'        => $frequency,
+            'db_connection_id' => $db_connection->id, 
         ]);
     }
 
@@ -104,4 +104,6 @@ class BackupScheduleTest extends TestCase
             'enabled'    => !$schedule->enabled,
         ]);
     }
+
+  
 }
