@@ -59,4 +59,26 @@ class BackupScheduleTest extends TestCase
             'frequency'        => $frequency,
         ]);
     }
+
+    public function test_update_specific_schedule()
+    {
+        $schedule = BackupSchedule::factory()->create();
+        $frequency = fake()->randomElement(array_keys(ScheduleFrequency::OPTIONS));
+        $data = [
+            'db_connection_id' => $schedule->db_connection_id, 
+            'frequency'        => $frequency,
+            'cron_expression'  => ScheduleFrequency::OPTIONS[$frequency],
+        ];
+
+        $response = $this->putJson('api/backup-schedules/'.$schedule->id,$data);
+
+        $response->assertStatus(202);
+        $response->assertJsonFragment([
+            'frequency'        => $frequency,
+        ]);
+
+        $this->assertDatabaseHas('backup_schedules', [
+            'frequency'        => $frequency,
+        ]);
+    }
 }
