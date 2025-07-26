@@ -121,4 +121,20 @@ class BackupScheduleTest extends TestCase
             'message'    => 'The selected frequency is invalid.',
         ]);
     }
+    public function test_store_new_schedule_fails_when_invalid_db_connection_provided()
+    {
+        $frequency = fake()->randomElement(array_keys(ScheduleFrequency::OPTIONS));
+        $data = [
+            'db_connection_id' => 999999, 
+            'frequency'        => $frequency,
+            'enabled'          => true
+        ];
+
+        $response = $this->postJson('api/backup-schedules/',$data);
+
+        $response->assertStatus(422);
+        $response->assertJsonFragment([
+            'message'    => 'The selected db connection id is invalid.',
+        ]);
+    }
 }
