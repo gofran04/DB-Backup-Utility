@@ -23,6 +23,7 @@ class BackupScheduleFactory extends Factory
             'db_connection_id' => DatabaseConnection::factory(), 
             'frequency'        => $frequency,
             'cron_expression'  => ScheduleFrequency::OPTIONS[$frequency],
+            'enabled'          => true,
         ];
     }
 }

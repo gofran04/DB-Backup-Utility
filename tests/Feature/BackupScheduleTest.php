@@ -11,7 +11,7 @@ use App\Models\DatabaseConnection;
 
 class BackupScheduleTest extends TestCase
 {
-    use RefreshDatabase;
+    // use RefreshDatabase;
 
     public function test_return_all_db_schedules()
     {
@@ -91,6 +91,17 @@ class BackupScheduleTest extends TestCase
         $response->assertStatus(200);
         $response->assertJson([
             "message" => "Task Schedule deleted successfully.",
+        ]);
+    }
+
+    public function test_toggle_specific_schedule()
+    {
+        $schedule = BackupSchedule::factory()->create();
+        $response = $this->patchJson('api/backup-schedules/'.$schedule->id.'/toggle/');
+
+        $response->assertStatus(202);
+        $response->assertJsonFragment([
+            'enabled'    => !$schedule->enabled,
         ]);
     }
 }

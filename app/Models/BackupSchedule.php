@@ -17,6 +17,10 @@ class BackupSchedule extends Model
         'enabled',
     ];
 
+    protected $casts = [
+        'enabled' => 'boolean',
+    ];
+
     public function dbConnection()
     {
         return $this->belongsTo(DatabaseConnection::class);
