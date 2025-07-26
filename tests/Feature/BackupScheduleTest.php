@@ -105,5 +105,20 @@ class BackupScheduleTest extends TestCase
         ]);
     }
 
-  
+    public function test_store_new_schedule_fails_when_invalid_frequency_provided()
+    {
+        $db_connection = DatabaseConnection::factory()->create();
+        $data = [
+            'db_connection_id' => $db_connection->id, 
+            'frequency'        => 'invalid_frequency',
+            'enabled'          => true
+        ];
+
+        $response = $this->postJson('api/backup-schedules/',$data);
+
+        $response->assertStatus(422);
+        $response->assertJsonFragment([
+            'message'    => 'The selected frequency is invalid.',
+        ]);
+    }
 }
