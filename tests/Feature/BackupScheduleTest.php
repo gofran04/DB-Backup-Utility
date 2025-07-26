@@ -131,6 +131,7 @@ class BackupScheduleTest extends TestCase
         $response->assertJsonFragment([
             'message'    => 'The selected frequency is invalid.',
         ]);
+        $response->assertInValid('frequency');
     }
     public function test_store_new_schedule_fails_when_invalid_db_connection_provided()
     {
@@ -147,6 +148,7 @@ class BackupScheduleTest extends TestCase
         $response->assertJsonFragment([
             'message'    => 'The selected db connection id is invalid.',
         ]);
+        $response->assertInValid('db_connection_id');
     }
 
     public function test_show_nonexistent_schedule_returns_404()
