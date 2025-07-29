@@ -14,6 +14,11 @@ class BackupStatus extends Command
     {
         $jobs = BackupJob::where('mechanism', 'automated')->orderBy('created_at', 'desc')->get();
 
+        if ($jobs->isEmpty()) {
+            $this->warn('⚠️  No automated backup jobs found.');
+            return Command::SUCCESS;
+        }
+        
         foreach ($jobs as $job) {
             // display job info here
             $this->line("Backup ID: {$job->id}");
