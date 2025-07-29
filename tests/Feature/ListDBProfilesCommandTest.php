@@ -72,4 +72,11 @@ class ListDBProfilesCommandTest extends TestCase
         ->expectsOutput("- temp_profile (Driver: mysql, DB: db1)")
         ->assertExitCode(0);
     }
+
+    public function test_list_profiles_from_empty_config_file()
+    {
+        $this->artisan('backup:config:list')
+        ->expectsOutput("No profiles found.")
+        ->assertExitCode(0);
+    }
 }
