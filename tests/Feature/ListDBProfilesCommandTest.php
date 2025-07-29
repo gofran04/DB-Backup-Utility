@@ -79,4 +79,16 @@ class ListDBProfilesCommandTest extends TestCase
         ->expectsOutput("No profiles found.")
         ->assertExitCode(0);
     }
+
+    public function test_list_profiles_with_missing_config_file()
+    {
+        // Delete config to simulate missing file
+        if (file_exists($this->testConfigPath)) {
+            unlink($this->testConfigPath);
+        }
+
+        $this->artisan('backup:config:list')
+            ->expectsOutput('No profiles found.')
+            ->assertExitCode(0);
+    }
 }
