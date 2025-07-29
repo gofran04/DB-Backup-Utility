@@ -94,4 +94,11 @@ class RemoveDBProfileCommandTest extends TestCase
             ->expectsOutput("Cancelled.")
             ->assertExitCode(0);
     }
+
+    public function test_remove_not_existed_profile()
+    {
+        $this->artisan('backup:config:remove', ['profile' => 'notexisted_profile'])
+            ->expectsOutput("Profile 'notexisted_profile' not found.")
+            ->assertExitCode(0);
+    }
 }
