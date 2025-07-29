@@ -121,4 +121,32 @@ class AddDBProfileCommandTest extends TestCase
             ->expectsOutput("✅ Profile 'existprofile' saved successfully.")
             ->assertExitCode(0);
     }
+
+    public function test_add_new_profile_using_existed_profile_name_and_not_allow_overwrinting()
+    {
+        $configService = $this->app->make(ConfigService::class);
+
+        // Save a dummy profile first
+        $configService->saveProfiles([
+            'existprofile' => [
+                'driver' => 'mysql',
+                'host' => '127.0.0.1',
+                'port' => 3306,
+                'database' => 'db1',
+                'username' => 'user1',
+                'password' => Crypt::encryptString('secret1'),
+            ],
+        ]);
+
+        // Run command with existing profile, confirm overwrite
+        $this->artisan('backup:config:add', ['driver' => 'mysql', 'profile' => 'existprofile'])
+            ->expectsQuestion('Database host', 'localhost')
+            ->expectsQuestion('Port', '3306')
+            ->expectsQuestion('Database name', 'testdb')
+            ->expectsQuestion('Username', 'testuser')
+            ->expectsQuestion('Password', 'testpass')
+            ->expectsConfirmation("Profile 'existprofile' already exists. Overwrite?", 'no')
+            ->expectsOutput("Cancelled.")
+            ->assertExitCode(1);
+    }
 }
