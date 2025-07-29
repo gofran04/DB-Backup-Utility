@@ -27,4 +27,13 @@ class BackupStatusCommandTest extends TestCase
             ->expectsOutput("⚠️  No automated backup jobs found.")
             ->assertExitCode(0);
     }
+
+    public function test_backup_status_command_with_only_manual_jobs()
+    {
+        BackupJob::factory()->create(['mechanism' => 'manual']);
+
+        $this->artisan('backup:status')
+            ->expectsOutput('⚠️  No automated backup jobs found.')
+            ->assertExitCode(0);
+    }
 }
