@@ -12,15 +12,7 @@ class AddDBProfile extends Command
     protected $signature = 'backup:config:add {driver} {profile}';
     protected $description = 'Add a new database configuration profile';
     
-    protected ConfigService $configService;
-
-    public function __construct(ConfigService $configService)
-    {
-        parent::__construct();
-        $this->configService = $configService;
-    }
-
-    public function handle()
+    public function handle(ConfigService $configService)
     {
         $driver = $this->argument('driver');
         $profile = $this->argument('profile');
@@ -63,7 +55,7 @@ class AddDBProfile extends Command
         // Encrypt the password before storing it
         $input['password'] = Crypt::encryptString($input['password']);
 
-        $profiles = $this->configService->loadProfiles();
+        $profiles = $configService->loadProfiles();
 
         if (isset($profiles[$profile])) {
             if (!$this->confirm("Profile '$profile' already exists. Overwrite?", false)) {
@@ -73,7 +65,7 @@ class AddDBProfile extends Command
         }
 
         $profiles[$profile] = $input;
-        $this->configService->saveProfiles($profiles);
+        $configService->saveProfiles($profiles);
 
         $this->info("✅ Profile '$profile' saved successfully.");
         return 0;
