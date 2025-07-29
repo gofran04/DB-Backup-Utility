@@ -69,7 +69,7 @@ class RemoveDBProfileCommandTest extends TestCase
 
         $this->artisan('backup:config:remove', ['profile' => 'temp_profile'])
             ->expectsConfirmation("Are you sure you want to delete the profile 'temp_profile'?",'yes')
-            ->expectsOutput("✅ Profile temp_profile removed successfully.")
+            ->expectsOutput("✅ Profile 'temp_profile' removed successfully.")
             ->assertExitCode(0);
     }
 }
