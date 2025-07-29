@@ -6,7 +6,6 @@ use Tests\TestCase;
 use App\Services\ConfigService;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\File;
-use Mockery;
 
 class AddDBProfileCommandTest extends TestCase
 {
@@ -146,6 +145,7 @@ class AddDBProfileCommandTest extends TestCase
             ->expectsQuestion('Username', 'testuser')
             ->expectsQuestion('Password', 'testpass')
             ->expectsConfirmation("Profile 'existprofile' already exists. Overwrite?", 'no')
+            ->expectsOutput("Creating new profile: existprofile (mysql)")
             ->expectsOutput("Cancelled.")
             ->assertExitCode(1);
     }
