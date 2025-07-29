@@ -18,12 +18,12 @@ class RemoveDBProfile extends Command
 
         if (!isset($profiles[$profile])) {
             $this->error("Profile '$profile' not found.");
-            return;
+            return 1;
         }
 
         if (!$this->confirm("Are you sure you want to delete the profile '$profile'?")) {
             $this->info('Cancelled.');
-            return;
+            return 1;
         }
 
         unset($profiles[$profile]);

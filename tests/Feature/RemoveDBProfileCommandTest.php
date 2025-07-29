@@ -92,13 +92,13 @@ class RemoveDBProfileCommandTest extends TestCase
         $this->artisan('backup:config:remove', ['profile' => 'temp_profile'])
             ->expectsConfirmation("Are you sure you want to delete the profile 'temp_profile'?",'no')
             ->expectsOutput("Cancelled.")
-            ->assertExitCode(0);
+            ->assertExitCode(1);
     }
 
     public function test_remove_not_existed_profile()
     {
         $this->artisan('backup:config:remove', ['profile' => 'notexisted_profile'])
             ->expectsOutput("Profile 'notexisted_profile' not found.")
-            ->assertExitCode(0);
+            ->assertExitCode(1);
     }
 }
