@@ -72,4 +72,26 @@ class RemoveDBProfileCommandTest extends TestCase
             ->expectsOutput("✅ Profile 'temp_profile' removed successfully.")
             ->assertExitCode(0);
     }
+
+    public function test_remove_profile_without_confirmation()
+    {
+        $configService = $this->app->make(ConfigService::class);
+
+        // Save a dummy profile first
+        $configService->saveProfiles([
+            'temp_profile' => [
+                'driver'   => 'mysql',
+                'host'     => '127.0.0.1',
+                'port'     => 3306,
+                'database' => 'db1',
+                'username' => 'user1',
+                'password' => Crypt::encryptString('secret1'),
+            ],
+        ]);
+
+        $this->artisan('backup:config:remove', ['profile' => 'temp_profile'])
+            ->expectsConfirmation("Are you sure you want to delete the profile 'temp_profile'?",'no')
+            ->expectsOutput("Cancelled.")
+            ->assertExitCode(0);
+    }
 }
