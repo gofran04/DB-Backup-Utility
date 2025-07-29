@@ -16,15 +16,15 @@ class BackupStatus extends Command
 
         foreach ($jobs as $job) {
             // display job info here
-            echo "Backup ID: {$job->id}\n";
-            echo "Status: {$job->status}\n";
-            echo "Started At: {$job->started_at}\n";
-            echo "Completed At: {$job->completed_at}\n";
-            echo "File Size: {$job->file_size}\n";
+            $this->line("Backup ID: {$job->id}");
+            $this->line("Status: {$job->status}");
+            $this->line("Started At: {$job->started_at}");
+            $this->line("Completed At: {$job->completed_at}");
+            $this->line("File Size: {$job->file_size}");
             if ($job->error_message) {
-                echo "Error: {$job->error_message}\n";
+                $this->error("Error: {$job->error_message}");
             }
-            echo "--------------------\n";
+            $this->line("--------------------");
         }
         return Command::SUCCESS;
     }
