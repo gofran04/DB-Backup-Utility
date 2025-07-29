@@ -81,4 +81,16 @@ class AddDBProfileCommandTest extends TestCase
         $this->assertEquals('testpass', $decryptedPassword);
     }
 
+    public function test_validation_fails()
+    {
+        // Pass invalid driver to trigger validation failure
+        $this->artisan('backup:config:add', [
+            'driver' => 'invalid',  // causes early failure, so it will never ask about other data(db,host,port,..) so no need to add them in the test, and if i add the it will cause error like:"Question "Database host" was not asked."
+            'profile' => 'failprofile'
+        ])
+        ->expectsOutput('Creating new profile: failprofile (invalid)')
+        ->expectsOutput('❌ Unsupported driver: invalid')
+        ->assertExitCode(1);
+    }
+
 }

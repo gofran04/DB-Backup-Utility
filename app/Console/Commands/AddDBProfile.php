@@ -20,10 +20,16 @@ class AddDBProfile extends Command
         $this->info("Creating new profile: $profile ($driver)");
 
         // Set sensible defaults per driver
-        $defaultPort = match ($driver) {
-            'mysql'                           => 3306,
-            'pgsql', 'postgres', 'postgresql' => 5432,
-        };
+        try {
+            $defaultPort = match ($driver) {
+                'mysql'                           => 3306,
+                'pgsql', 'postgres', 'postgresql' => 5432,
+                default => throw new \InvalidArgumentException("Unsupported driver: $driver"),
+            };
+        } catch (\InvalidArgumentException $e) {
+            $this->error("❌ " . $e->getMessage());
+            return 1;
+        }
 
         
         $input = [
