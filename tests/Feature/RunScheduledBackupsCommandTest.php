@@ -7,6 +7,7 @@ use App\Models\BackupSchedule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
+use Carbon\Carbon;
 
 class RunScheduledBackupsCommandTest extends TestCase
 {
@@ -43,5 +44,22 @@ class RunScheduledBackupsCommandTest extends TestCase
             'database_connection_id' => $task->dbConnection->id,
             'mechanism'              => 'automated',
         ]);
+    }
+
+    public function test_nothing_runs_if_schedule_is_not_due()
+    {
+        // Force the date to the 15th of the month, so nothing will run, because created task has frequency= monthly(at the first day of the month only)
+        Carbon::setTestNow(Carbon::create(null, null, 15, 18, 0, 0)); 
+
+        BackupSchedule::factory()->create([
+            'frequency'       => 'monthly',
+            'cron_expression' => '0 0 1 * *', 
+            'enabled'         => true,
+        ]);
+
+        $this->artisan('backup:schedule')
+            ->assertExitCode(0);
+        
+        $this->assertDatabaseCount('backup_jobs', 0); // No jobs created
     }
 }
