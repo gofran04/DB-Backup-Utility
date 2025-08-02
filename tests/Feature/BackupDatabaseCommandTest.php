@@ -99,4 +99,11 @@ class BackupDatabaseCommandTest extends TestCase
             ->expectsOutput("✅ Backup successful!")
             ->assertExitCode(0);
     }
+
+    public function test_backup_db_via_command_fails_when_using_not_found_profile()
+    {
+        $this->artisan('db:backup',['--profile' => 'not_founded_profile'])
+            ->expectsOutput("❌ Profile 'not_founded_profile' not found.")
+            ->assertExitCode(1);//failure
+    }
 }
