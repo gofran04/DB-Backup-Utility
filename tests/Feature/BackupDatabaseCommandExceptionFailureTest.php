@@ -74,7 +74,7 @@ class BackupDatabaseCommandExceptionFailureTest extends TestCase
         $db_connection = DatabaseConnection::factory()->create();
 
         $this->artisan('db:backup',['id' => $db_connection->id])
-            // ->expectsOutput('❌ Backup failed: Backup Operation Failed.')
+            ->expectsOutput("❌ Backup failed: Backup Operation Failed. (failed)")
             ->assertExitCode(1);//failure
 
 
