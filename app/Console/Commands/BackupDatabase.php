@@ -31,7 +31,7 @@ class BackupDatabase extends Command
     {
         $id = $this->argument('id');
         $profileName = $this->option('profile');
-        $outputPath = config('backup.storage_path') . 'backups'; // Directory where backups will be stored
+        $outputPath = config('backup.storage_path') . '/backups'; // Directory where backups will be stored
 
         // Ensure one of the options is provided
         if (!$id && !$profileName) {

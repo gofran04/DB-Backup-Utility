@@ -7,10 +7,15 @@ use App\Models\DatabaseConnection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
+use App\Services\ConfigService;
+use Illuminate\Support\Facades\Crypt;
 
 class BackupDatabaseCommandTest extends TestCase
 {
     use RefreshDatabase;
+    protected string $testConfigDir;
+    protected string $testConfigPath;
+
 
     protected function setUp():void
     {
@@ -19,11 +24,40 @@ class BackupDatabaseCommandTest extends TestCase
         $testBackupPath = storage_path('app/test-backups');
         File::ensureDirectoryExists($testBackupPath);
         Config::set('backup.storage_path', $testBackupPath);
+
+        // Use a temp config path to avoid messing with real user config
+        $this->testConfigDir = base_path('tests/temp-config');
+        $this->testConfigPath = $this->testConfigDir . '/config.json';
+
+        // Ensure directory exists and create empty config file
+        if (!File::exists($this->testConfigDir)) {
+            File::makeDirectory($this->testConfigDir, 0755, true);
+        }
+        File::put($this->testConfigPath, json_encode(['profiles' => []], JSON_PRETTY_PRINT));
+
+        // Mock ConfigService to use our test config path
+        $this->app->bind(ConfigService::class, function () {
+            $mock = new class($this->testConfigDir, $this->testConfigPath) extends \App\Services\ConfigService {
+                public function __construct($dir, $path)
+                {
+                    $this->configDir = $dir;
+                    $this->configPath = $path;
+                }
+            };
+            return $mock;
+        });
     }
 
     protected function tearDown(): void
     {
         File::deleteDirectory(storage_path('app/test-backups'));
+        // Clean up temp config after test
+        if (File::exists($this->testConfigPath)) {
+            File::delete($this->testConfigPath);
+        }
+        if (File::exists($this->testConfigDir)) {
+            File::deleteDirectory($this->testConfigDir);
+        }
         parent::tearDown();
     }
 
@@ -43,5 +77,26 @@ class BackupDatabaseCommandTest extends TestCase
             ->expectsOutput("🔍 Loading DB config from database_connections table (ID: 9999)")
             ->expectsOutput("❌ No database connection found with ID: 9999")
             ->assertExitCode(1);//failure
+    }
+
+    public function test_backup_db_via_command_successfully_using_profile()
+    {
+        $configService = $this->app->make(ConfigService::class);
+
+        // Save a dummy profile first
+        $configService->saveProfiles([
+            'temp_profile' => [
+                'driver'   => 'mysql',
+                'host'     => '127.0.0.1',
+                'port'     => 3306,
+                'database' => 'TechFlex',
+                'username' => 'newuser',
+                'password' => Crypt::encryptString(env('TEST_DB_PASSWORD')), 
+            ],
+        ]);
+        $this->artisan('db:backup',['--profile' => 'temp_profile'])
+            ->expectsOutput("🔍 Loading DB config from profile: temp_profile")
+            ->expectsOutput("✅ Backup successful!")
+            ->assertExitCode(0);
     }
 }
