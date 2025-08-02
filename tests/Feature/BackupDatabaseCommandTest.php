@@ -106,4 +106,11 @@ class BackupDatabaseCommandTest extends TestCase
             ->expectsOutput("❌ Profile 'not_founded_profile' not found.")
             ->assertExitCode(1);//failure
     }
+
+    public function test_backup_db_via_command_fails_when_neither_db_id_or_profile_provided()
+    {
+        $this->artisan('db:backup')
+            ->expectsOutput('You must provide either a database ID or a --profile.')
+            ->assertExitCode(2);//Command::INVALID return === 2
+    }
 }
