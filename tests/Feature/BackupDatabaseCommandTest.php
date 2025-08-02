@@ -36,4 +36,12 @@ class BackupDatabaseCommandTest extends TestCase
             ->expectsOutput("✅ Backup successful!")
             ->assertExitCode(0);
     }
+
+    public function test_backup_db_via_command_fails_when_using_not_found_db_id()
+    {
+        $this->artisan('db:backup',['id' => 9999]) // using not found db
+            ->expectsOutput("🔍 Loading DB config from database_connections table (ID: 9999)")
+            ->expectsOutput("❌ No database connection found with ID: 9999")
+            ->assertExitCode(1);//failure
+    }
 }
