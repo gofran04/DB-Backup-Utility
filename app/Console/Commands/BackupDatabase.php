@@ -37,6 +37,9 @@ class BackupDatabase extends Command
         if (!$id && !$profileName) {
             $this->error('You must provide either a database ID or a --profile.');
             return Command::INVALID;
+        }elseif($id && $profileName) {
+            $this->error('You must provide a database ID or a --profile. Not both');
+            return Command::INVALID;
         }
 
         try {
