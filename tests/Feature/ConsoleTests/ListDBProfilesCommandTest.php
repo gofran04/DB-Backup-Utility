@@ -1,11 +1,12 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\ConsoleTests;
 
 use Tests\TestCase;
 use Illuminate\Support\Facades\File;
 use App\Services\ConfigService;
 use Illuminate\Support\Facades\Crypt;
+use Mockery;
 
 class ListDBProfilesCommandTest extends TestCase
 {
@@ -48,6 +49,8 @@ class ListDBProfilesCommandTest extends TestCase
         if (File::exists($this->testConfigDir)) {
             File::deleteDirectory($this->testConfigDir);
         }
+
+        Mockery::close();
         parent::tearDown();
     }
 

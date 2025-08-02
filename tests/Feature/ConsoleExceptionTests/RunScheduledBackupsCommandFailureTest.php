@@ -1,13 +1,12 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\ConsoleExceptionTests;
 
 use Tests\TestCase;
 use App\Models\BackupSchedule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
-use Carbon\Carbon;
 use App\Exceptions\BackupFailedException;
 use App\Services\DatabaseBackupService;
 use Illuminate\Support\Facades\Notification;
@@ -30,8 +29,8 @@ class RunScheduledBackupsCommandFailureTest extends TestCase
     protected function tearDown(): void
     {
         File::deleteDirectory(storage_path('app/test-backups'));
-        parent::tearDown();
         Mockery::close();
+        parent::tearDown();
     }
 
     public function test_throws_BackupFailedException_and_catches_it()
