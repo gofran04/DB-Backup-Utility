@@ -113,4 +113,11 @@ class BackupDatabaseCommandTest extends TestCase
             ->expectsOutput('You must provide either a database ID or a --profile.')
             ->assertExitCode(2);//Command::INVALID return === 2
     }
+
+    public function test_backup_db_via_command_fails_when_both_db_id_and_profile_provided()
+    {
+        $this->artisan('db:backup',['id' => 1 ,'--profile' => 'temp_profile'])
+            ->expectsOutput('You must provide a database ID or a --profile. Not both')
+            ->assertExitCode(2);//Command::INVALID return === 2
+    }
 }
