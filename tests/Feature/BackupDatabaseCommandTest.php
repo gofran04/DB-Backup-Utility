@@ -120,4 +120,24 @@ class BackupDatabaseCommandTest extends TestCase
             ->expectsOutput('You must provide a database ID or a --profile. Not both')
             ->assertExitCode(2);//Command::INVALID return === 2
     }
+
+    public function test_backup_db_via_command_success_and_dump_file_exist()
+    {
+        $db_connection = DatabaseConnection::factory()->create();
+
+        $this->artisan('db:backup',['id' => $db_connection->id])
+            ->expectsOutput("🔍 Loading DB config from database_connections table (ID: $db_connection->id)")
+            ->expectsOutput("✅ Backup successful!")
+            ->assertExitCode(0);
+
+        // Compose expected backup file path (adjust if your backup filename format is different)
+        $backupDir = storage_path('app/test-backups/backups');
+        
+        // Since you may not know exact filename, check that backup dir is not empty
+        $files = File::files($backupDir);
+
+        // Assert backup directory exists and has at least one file
+        $this->assertTrue(File::exists($backupDir));
+        $this->assertNotEmpty($files, "No backup file was created in $backupDir");
+    }
 }
