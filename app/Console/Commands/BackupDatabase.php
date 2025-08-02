@@ -31,11 +31,14 @@ class BackupDatabase extends Command
     {
         $id = $this->argument('id');
         $profileName = $this->option('profile');
-        $outputPath = config('backup.storage_path') . 'backups'; // Directory where backups will be stored
+        $outputPath = config('backup.storage_path') . '/backups'; // Directory where backups will be stored
 
         // Ensure one of the options is provided
         if (!$id && !$profileName) {
             $this->error('You must provide either a database ID or a --profile.');
+            return Command::INVALID;
+        }elseif($id && $profileName) {
+            $this->error('You must provide a database ID or a --profile. Not both');
             return Command::INVALID;
         }
 
