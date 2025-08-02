@@ -51,7 +51,8 @@ class RunScheduledBackups extends Command
 
                 $this->info("Running backup for schedule ID: {$schedule->id}");
                 try {
-                    $result = $backupService->backup($schedule->dbConnection,'backups'); // assumes this method exists
+                    $path = config('backup.storage_path') . '/backups';
+                    $result = $backupService->backupUsingDbId($schedule->dbConnection,$path); // assumes this method exists
                     $backupJob->update([
                         'status'       => 'completed',
                         'backup_path'  => $result['relative_path'],
