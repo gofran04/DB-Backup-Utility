@@ -12,4 +12,5 @@ interface DatabaseAdapterInterface
 
     public function restore(string $filePath);
 
+    public function createDatabaseIfNotExists(): bool;
 }
