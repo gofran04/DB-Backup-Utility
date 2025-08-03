@@ -163,6 +163,9 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
 
     public function restore($filePath)
     {
+        //check it db will used for restore exist ?
+        $this->createDatabaseIfNotExists();
+
         // Check if backup file exists
         if (!file_exists($filePath)) {
             throw new RestoreFailedException("Backup file not found at: $filePath", 'file_not_found');
@@ -225,5 +228,26 @@ class MySQLDatabaseAdapter implements DatabaseAdapterInterface
         }
 
         return true;
+    }
+
+    public function createDatabaseIfNotExists(): bool
+    {
+        $database = $this->db_name;
+    
+        $dsn = "mysql:host={$this->host};port={$this->port}";
+        
+        try {
+            $pdo = new \PDO($dsn, $this->username, $this->password, [
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+            ]);
+
+                $sql = "CREATE DATABASE IF NOT EXISTS `{$database}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci";
+                $pdo->exec($sql);
+            
+
+            return true;
+        } catch (RestoreFailedException $e) {
+            return false;
+        }
     }
 }

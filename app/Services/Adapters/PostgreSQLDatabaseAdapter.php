@@ -166,6 +166,9 @@ class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
 
     public function restore(string $filePath)
     {
+        //check it db will used for restore exist ?
+        $this->createDatabaseIfNotExists();
+
         $cmd = sprintf(
             'PGPASSWORD=%s /usr/bin/psql -U %s -h %s -p %d -d %s -f %s 2>&1',
             escapeshellarg($this->password),
@@ -226,5 +229,27 @@ class PostgreSQLDatabaseAdapter implements DatabaseAdapterInterface
         }
 
         return $exitCode === 0;
+    }
+
+    public function createDatabaseIfNotExists(): bool
+    {
+        $database = $this->db_name;
+        $dsn = "pgsql:host={$this->host};port={$this->port}";
+        
+        try {
+            $pdo = new \PDO($dsn, $this->username, $this->password, [
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+            ]);
+
+            $stmt = $pdo->prepare("SELECT 1 FROM pg_database WHERE datname = :dbname");
+            $stmt->execute(['dbname' => $database]);
+
+            if (!$stmt->fetch()) 
+                $pdo->exec("CREATE DATABASE \"{$database}\"");
+           
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 }
