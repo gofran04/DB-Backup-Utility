@@ -146,6 +146,18 @@ class RestoreDatabaseCommandTest extends TestCase
             ->assertExitCode(2);//Command::INVALID return === 2
     }
 
+    public function test_restore_db_via_command_fails_when_the_dump_file_does_not_exist()
+    {
+        $db_connection = DatabaseConnection::factory()->create();
+
+        $this->artisan('backup:restore',[
+            'file'      => 'not_existed_file.sql',
+            '--id'      => $db_connection->id,
+            ])
+            ->expectsOutput("❌ Backup file not found: not_existed_file.sql")
+            ->assertExitCode(1);//failure
+    }
+
     private function createBackupForRestoreTest(string $dbName = 'restore_db_test'): array
     {
         $dbConnection = DatabaseConnection::factory()->create([
