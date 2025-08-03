@@ -13,6 +13,7 @@ use App\Services\DatabaseBackupService;
 class RestoreDatabaseCommandTest extends TestCase
 {
     use RefreshDatabase;
+    
     protected string $storagePath;
 
     protected function setUp(): void
@@ -40,28 +41,41 @@ class RestoreDatabaseCommandTest extends TestCase
 
     public function test_restore_db_via_command_successfully_using_db_id()
     {
-        $db_connection = DatabaseConnection::factory()->create([
-            'db_name'  => 'restore_db_test',  // that db will check by createDatabaseIfNotExists() and created if it deos not exist
-        ]);
+        $result = $this->createBackupForRestoreTest();
 
-        $compressor = app(CompressionServiceInterface::class);
-        $adapter = app(DatabaseAdapterFactory::class)->make($db_connection);
-        $adapter->createDatabaseIfNotExists(); // check if db created by factory is really exist on the databasebase and create it if it does not exist
-
-        $backupService = new DatabaseBackupService($adapter,$compressor);
-        $backupJob = $backupService->backupUsingDbId($db_connection, $this->storagePath);
-        $fullPath = storage_path('app/' . $backupJob['relative_path']);
-
+        $dbConnection = $result['db_connection'];
+        $backupJob = $result['backup_job'];
+        $fullPath = $result['full_path'];
 
         $this->artisan('backup:restore',[
             'file' => $backupJob['relative_path'],
-            '--id' => $db_connection->id,
+            '--id' => $dbConnection->id,
             ])
-            ->expectsOutput("🔍 Loading DB config from database_connections table (ID: $db_connection->id)")
+            ->expectsOutput("🔍 Loading DB config from database_connections table (ID: $dbConnection->id)")
             ->expectsOutput("🚀 Starting restore...")
             ->expectsOutput("✅ Restore complete.")
             ->assertExitCode(0);
 
         $this->assertFileExists($fullPath);
+    }
+
+    private function createBackupForRestoreTest(string $dbName = 'restore_db_test'): array
+    {
+        $dbConnection = DatabaseConnection::factory()->create([
+            'db_name' => $dbName,
+        ]);
+
+        $compressor = app(CompressionServiceInterface::class);
+        $adapter = app(DatabaseAdapterFactory::class)->make($dbConnection);
+        $adapter->createDatabaseIfNotExists();
+
+        $backupService = new DatabaseBackupService($adapter, $compressor);
+        $backupJob = $backupService->backupUsingDbId($dbConnection, $this->storagePath);
+
+        return [
+            'db_connection' => $dbConnection,
+            'backup_job' => $backupJob,
+            'full_path' => storage_path('app/' . $backupJob['relative_path']),
+        ];
     }
 }
