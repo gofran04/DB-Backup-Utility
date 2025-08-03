@@ -9,12 +9,16 @@ use Illuminate\Support\Facades\File;
 use App\Factories\DatabaseAdapterFactory;
 use App\Services\Compression\CompressionServiceInterface;
 use App\Services\DatabaseBackupService;
+use App\Services\ConfigService;
+use Illuminate\Support\Facades\Crypt;
 
 class RestoreDatabaseCommandTest extends TestCase
 {
     use RefreshDatabase;
-    
+
     protected string $storagePath;
+    protected string $testConfigDir;
+    protected string $testConfigPath;
 
     protected function setUp(): void
     {
@@ -27,6 +31,16 @@ class RestoreDatabaseCommandTest extends TestCase
         if (!File::exists($this->storagePath)) {
             File::makeDirectory($this->storagePath, 0777, true, true);
         }
+
+        // Use a temp config path to avoid messing with real user config
+        $this->testConfigDir = base_path('tests/temp-config');
+        $this->testConfigPath = $this->testConfigDir . '/config.json';
+
+        // Ensure directory exists and create empty config file
+        if (!File::exists($this->testConfigDir)) {
+            File::makeDirectory($this->testConfigDir, 0755, true);
+        }
+        File::put($this->testConfigPath, json_encode(['profiles' => []], JSON_PRETTY_PRINT));
     }
 
     protected function tearDown(): void
@@ -34,6 +48,13 @@ class RestoreDatabaseCommandTest extends TestCase
         // Clean up the test-backups folder
         if (File::exists($this->storagePath)) {
             File::cleanDirectory($this->storagePath);
+        }
+        // Clean up temp config after test
+        if (File::exists($this->testConfigPath)) {
+            File::delete($this->testConfigPath);
+        }
+        if (File::exists($this->testConfigDir)) {
+            File::deleteDirectory($this->testConfigDir);
         }
 
         parent::tearDown();
@@ -52,6 +73,40 @@ class RestoreDatabaseCommandTest extends TestCase
             '--id' => $dbConnection->id,
             ])
             ->expectsOutput("🔍 Loading DB config from database_connections table (ID: $dbConnection->id)")
+            ->expectsOutput("🚀 Starting restore...")
+            ->expectsOutput("✅ Restore complete.")
+            ->assertExitCode(0);
+
+        $this->assertFileExists($fullPath);
+    }
+
+    public function test_restore_db_via_command_successfully_using_profile()
+    {
+        $configService = $this->app->make(ConfigService::class);
+
+        // Save a dummy profile first
+        $configService->saveProfiles([
+            'temp_profile' => [
+                'driver'   => 'mysql',
+                'host'     => '127.0.0.1',
+                'port'     => 3306,
+                'database' => 'TechFlex',
+                'username' => 'newuser',
+                'password' => Crypt::encryptString(env('TEST_DB_PASSWORD')), 
+            ],
+        ]);
+
+        $result = $this->createBackupForRestoreTest();
+        
+        $dbConnection = $result['db_connection'];
+        $backupJob = $result['backup_job'];
+        $fullPath = $result['full_path'];        
+
+        $this->artisan('backup:restore',[
+            'file'      => $backupJob['relative_path'],
+            '--profile' => 'temp_profile',
+            ])
+            ->expectsOutput("🔍 Loading DB config from profile: temp_profile")
             ->expectsOutput("🚀 Starting restore...")
             ->expectsOutput("✅ Restore complete.")
             ->assertExitCode(0);
