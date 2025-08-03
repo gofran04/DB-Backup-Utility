@@ -131,6 +131,21 @@ class RestoreDatabaseCommandTest extends TestCase
             ->assertExitCode(2);//Command::INVALID return === 2
     }
 
+    public function test_restore_db_via_command_fails_when_neither_db_id_or_profile_provided()
+    {
+        $result = $this->createBackupForRestoreTest();
+
+        $dbConnection = $result['db_connection'];
+        $backupJob = $result['backup_job'];
+        $fullPath = $result['full_path'];
+
+        $this->artisan('backup:restore',[
+            'file'      => $backupJob['relative_path'],
+            ])
+            ->expectsOutput('❌ You must provide either --id OR --profile (but not both).')
+            ->assertExitCode(2);//Command::INVALID return === 2
+    }
+
     private function createBackupForRestoreTest(string $dbName = 'restore_db_test'): array
     {
         $dbConnection = DatabaseConnection::factory()->create([
