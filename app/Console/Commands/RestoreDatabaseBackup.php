@@ -47,7 +47,7 @@ class RestoreDatabaseBackup extends Command
         if (str_ends_with($resolvedPath, '.gz')) {
             try {
                 $this->info("🔄 Decompressing file...");
-                $resolvedPath = $this->decompressor->decompress($resolvedPath);
+                $resolvedPath = $this->decompressor->decompress($file);
             } catch (RestoreFailedException $e) {
                 $this->error("❌ Decompression failed: " . $e->getMessage());
                 return Command::FAILURE;

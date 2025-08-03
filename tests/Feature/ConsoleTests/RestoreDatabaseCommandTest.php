@@ -158,6 +158,27 @@ class RestoreDatabaseCommandTest extends TestCase
             ->assertExitCode(1);//failure
     }
 
+    public function test_restore_db_via_command_successfully_by_providing_compressed_dump_file()
+    {
+        $result = $this->createBackupForRestoreTest();
+
+        $dbConnection = $result['db_connection'];
+        $backupJob = $result['backup_job'];
+        $fullPath = $result['full_path'];
+
+        $this->artisan('backup:restore',[
+            'file' => $backupJob['relative_path'].'.gz',
+            '--id' => $dbConnection->id,
+            ])
+            ->expectsOutput("🔄 Decompressing file...")
+            ->expectsOutput("🔍 Loading DB config from database_connections table (ID: $dbConnection->id)")
+            ->expectsOutput("🚀 Starting restore...")
+            ->expectsOutput("✅ Restore complete.")
+            ->assertExitCode(0);
+
+        $this->assertFileExists($fullPath.'.gz');
+    }
+
     private function createBackupForRestoreTest(string $dbName = 'restore_db_test'): array
     {
         $dbConnection = DatabaseConnection::factory()->create([
