@@ -33,7 +33,7 @@ class RestoreDatabaseBackup extends Command
         // ✅ Enforce only one input method
         if (($id && $profile) || (!$id && !$profile)) {
             $this->error('❌ You must provide either --id OR --profile (but not both).');
-            return Command::FAILURE;
+            return Command::INVALID;
         }
 
         // ✅ Resolve file path
@@ -47,7 +47,7 @@ class RestoreDatabaseBackup extends Command
         if (str_ends_with($resolvedPath, '.gz')) {
             try {
                 $this->info("🔄 Decompressing file...");
-                $resolvedPath = $this->decompressor->decompress($resolvedPath);
+                $resolvedPath = $this->decompressor->decompress($file);
             } catch (RestoreFailedException $e) {
                 $this->error("❌ Decompression failed: " . $e->getMessage());
                 return Command::FAILURE;
