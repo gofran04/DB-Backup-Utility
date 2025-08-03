@@ -33,7 +33,7 @@ class RestoreDatabaseBackup extends Command
         // ✅ Enforce only one input method
         if (($id && $profile) || (!$id && !$profile)) {
             $this->error('❌ You must provide either --id OR --profile (but not both).');
-            return Command::FAILURE;
+            return Command::INVALID;
         }
 
         // ✅ Resolve file path
