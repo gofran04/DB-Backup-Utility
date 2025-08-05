@@ -47,4 +47,26 @@ class BackupCleanupCommandTest extends TestCase
 
         $this->assertCount(5, BackupJob::withoutTrashed()->get());
     }
+
+    public function test_cleanup_old_backups_by_deleting_backups_older_than_N_days()
+    {
+        $db_connection = DatabaseConnection::factory()->create();
+        BackupJob::factory()->count(4)->create([
+            'database_connection_id' => $db_connection->id,
+            'created_at'             => now()->subDays(10)
+        ]);
+
+        BackupJob::factory()->create([
+            'database_connection_id' => $db_connection->id,
+            'created_at'             => now()->subDays(1)
+        ]);
+
+        $olderThanDays = 10;
+        $this->artisan('backup:cleanup',['--older-than-days' => $olderThanDays])            
+            ->expectsOutput("🧹 Cleaning up: Removing backups older than {$olderThanDays} days...")
+            ->expectsOutput("✅ Cleanup completed.")
+            ->assertExitCode(0);
+
+        $this->assertCount(1, BackupJob::withoutTrashed()->get());
+    }
 }
