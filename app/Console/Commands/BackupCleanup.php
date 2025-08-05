@@ -22,7 +22,7 @@ class BackupCleanup extends Command
         $keepLast =  $this->option('keep-last');
         $olderThanDays =  $this->option('older-than-days');
 
-        if ($keepLast !== null && $olderThanDays !== null){
+        if (($keepLast !== null && $olderThanDays !== null) || ($keepLast == null && $olderThanDays == null)){
             $this->error('❌ You must provide either --keep-last OR --older-than-days (but not both)');
             return Command::INVALID;
         }

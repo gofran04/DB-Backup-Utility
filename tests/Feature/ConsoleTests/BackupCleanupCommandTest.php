@@ -79,4 +79,11 @@ class BackupCleanupCommandTest extends TestCase
             ->expectsOutput('❌ You must provide either --keep-last OR --older-than-days (but not both)')
             ->assertExitCode(2);
     }
+
+    public function test_cleanup_fails_when_neither_keeplast_or_olderThanDays_provided()
+    {
+        $this->artisan('backup:cleanup')
+            ->expectsOutput('❌ You must provide either --keep-last OR --older-than-days (but not both)')
+            ->assertExitCode(2);
+    }
 }
