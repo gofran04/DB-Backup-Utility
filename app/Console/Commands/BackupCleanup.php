@@ -19,19 +19,29 @@ class BackupCleanup extends Command
 
     public function handle()
     {
-        $keepLast = (int) $this->option('keep-last');
-        $olderThanDays = (int) $this->option('older-than-days');
+        $keepLast =  $this->option('keep-last');
+        $olderThanDays =  $this->option('older-than-days');
 
-        if (($keepLast && $olderThanDays) || (!$keepLast && !$olderThanDays)) {
+        if ($keepLast !== null && $olderThanDays !== null){
             $this->error('❌ You must provide either --keep-last OR --older-than-days (but not both)');
             return Command::INVALID;
         }
 
         try {
-            if ($keepLast) {
+            if ($keepLast !== null) 
+            {
+                if (!is_numeric($keepLast) || (int)$keepLast < 1) {
+                    $this->error('❌ --keep-last must be a positive integer greater than 0');
+                    return Command::INVALID;
+                }
                 $this->info("🧹 Cleaning up: Keeping only last {$keepLast} backups...");
                 $this->backupCleanupService->cleanup($keepLast, null);
-            } else {
+            }
+            if($olderThanDays !== null) {
+                if (!is_numeric($olderThanDays) || (int)$olderThanDays < 1) {
+                    $this->error('❌ --older-than-days must be a positive integer greater than 0');
+                    return Command::INVALID;
+                }
                 $this->info("🧹 Cleaning up: Removing backups older than {$olderThanDays} days...");
                 $this->backupCleanupService->cleanup(null, $olderThanDays);
             }
