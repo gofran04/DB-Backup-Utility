@@ -69,4 +69,14 @@ class BackupCleanupCommandTest extends TestCase
 
         $this->assertCount(1, BackupJob::withoutTrashed()->get());
     }
+
+    public function test_cleanup_fails_when_both_options_provided()
+    {
+        $this->artisan('backup:cleanup', [
+            '--keep-last' => 3,
+            '--older-than-days' => 7
+        ])
+            ->expectsOutput('❌ You must provide either --keep-last OR --older-than-days (but not both)')
+            ->assertExitCode(2);
+    }
 }
