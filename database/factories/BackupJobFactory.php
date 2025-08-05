@@ -23,7 +23,13 @@ class BackupJobFactory extends Factory
         $connectionName = 'temp_' . uniqid();
         $dbName = 'TechFlex'; 
         $filename = $dbName . '_' . $connectionName . '_backup_' . now()->format('Ymd_His') . '.sql';
-        $path = 'backups/' . $filename;
+       
+        // Change path depending on environment
+        $backupDir = app()->environment('testing')
+            ? 'test-backups/'
+            : 'backups/';
+            
+        $path = $backupDir . $filename;
 
         return [
             'database_connection_id' => DatabaseConnection::factory(['db_name' => $dbName]), 
