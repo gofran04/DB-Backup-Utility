@@ -42,4 +42,11 @@ class BackupStorageReportCommandTest extends TestCase
             ->expectsOutputToContain("⬇️ Smallest:")
             ->assertExitCode(0);
     }
+
+     public function test_reporting_backup_storage_when_no_backup_exist()
+    {
+        $this->artisan('backup-storage-report')
+                ->expectsOutputToContain("No backup files found.")
+                ->assertExitCode(0);
+    }
 }
