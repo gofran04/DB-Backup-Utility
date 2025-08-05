@@ -39,7 +39,7 @@ class BackupCleanupCommandTest extends TestCase
             'created_at'             => now()->subDays(10)
         ]);
 
-        $keepLast = 'p';
+        $keepLast = 5;
         $this->artisan('backup:cleanup',['--keep-last' => $keepLast])            
             ->expectsOutput("🧹 Cleaning up: Keeping only last {$keepLast} backups...")
             ->expectsOutput("✅ Cleanup completed.")
