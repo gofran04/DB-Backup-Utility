@@ -11,7 +11,7 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: testing
+          MYSQL_DATABASE: Test-db-backup-utility
           MYSQL_USER: laravel
           MYSQL_PASSWORD: secret
         ports:
@@ -47,7 +47,7 @@ jobs:
           echo "DB_CONNECTION=mysql" >> .env
           echo "DB_HOST=127.0.0.1" >> .env
           echo "DB_PORT=3306" >> .env
-          echo "DB_DATABASE=testing" >> .env
+          echo "DB_DATABASE=Test-db-backup-utility" >> .env
           echo "DB_USERNAME=laravel" >> .env
           echo "DB_PASSWORD=secret" >> .env
 
