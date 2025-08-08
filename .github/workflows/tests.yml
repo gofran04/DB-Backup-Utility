@@ -12,12 +12,12 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: Test-db-backup-utility
-          MYSQL_USER: laravel
-          MYSQL_PASSWORD: secret
+          MYSQL_USER: ${{ secrets.DB_USERNAME }}
+          MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping --silent"
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }}"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
@@ -29,26 +29,35 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
-          extensions: mbstring, bcmath, pdo_mysql
+          php-version: 8.2
+          extensions: mbstring, pdo, mysql, bcmath
           coverage: none
 
-      - name: Copy .env.example to .env
-        run: cp .env.example .env
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
 
-      - name: Inject database credentials from secrets
+      - name: Create .env file
         run: |
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
-          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> $GITHUB_ENV
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
-          echo "TEST_DB_USER=${{ secrets.TEST_DB_USER }}" >> $GITHUB_ENV
-          echo "TEST_DB_PASS=${{ secrets.TEST_DB_PASS }}" >> $GITHUB_ENV
-
-      - name: Generate app key
-        run: php artisan key:generate
+          cp .env.example .env
+          php artisan key:generate
+        env:
+          APP_KEY: base64:dummy
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: Test-db-backup-utility
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
       - name: Run migrations
         run: php artisan migrate --force
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: Test-db-backup-utility
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
       - name: Run tests
         run: php artisan test --process-isolation
