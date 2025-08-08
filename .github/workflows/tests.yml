@@ -33,26 +33,22 @@ jobs:
           extensions: mbstring, bcmath, pdo_mysql
           coverage: none
 
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
-
-      - name: Copy .env
+      - name: Copy .env.example to .env
         run: cp .env.example .env
+
+      - name: Inject database credentials from secrets
+        run: |
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> $GITHUB_ENV
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
+          echo "TEST_DB_USER=${{ secrets.TEST_DB_USER }}" >> $GITHUB_ENV
+          echo "TEST_DB_PASS=${{ secrets.TEST_DB_PASS }}" >> $GITHUB_ENV
 
       - name: Generate app key
         run: php artisan key:generate
-
-      - name: Configure .env database connection
-        run: |
-          echo "DB_CONNECTION=mysql" >> .env
-          echo "DB_HOST=127.0.0.1" >> .env
-          echo "DB_PORT=3306" >> .env
-          echo "DB_DATABASE=Test-db-backup-utility" >> .env
-          echo "DB_USERNAME=laravel" >> .env
-          echo "DB_PASSWORD=secret" >> .env
 
       - name: Run migrations
         run: php artisan migrate --force
 
       - name: Run tests
-        run: php artisan test --process-isolation 
+        run: php artisan test --process-isolation
