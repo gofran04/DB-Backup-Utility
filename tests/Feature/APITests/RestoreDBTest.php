@@ -88,7 +88,7 @@ class RestoreDBTest extends TestCase
             'port'     => 3306,
             'database' => 'testrestore',
             'username' => 'newuser',
-            'password' => Crypt::encryptString(env('DB_NEWUSER_PASSWORD')), 
+            'password' => Crypt::encryptString(env('DB_PASSWORD')), 
         ];
 
         $configService->saveProfiles($profiles);
