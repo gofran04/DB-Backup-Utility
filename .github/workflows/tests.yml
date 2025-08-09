@@ -59,6 +59,14 @@ jobs:
           mysql -h 127.0.0.1 -uroot -proot -e "GRANT ALL PRIVILEGES ON testing.* TO 'newuser'@'%';"
           mysql -h 127.0.0.1 -uroot -proot -e "FLUSH PRIVILEGES;"
 
+          mysql -h127.0.0.1 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS testrestore;"
+          mysql -h127.0.0.1 -uroot -proot -e "GRANT ALL PRIVILEGES ON testrestore.* TO 'newuser'@'%';"
+
+          mysql -h127.0.0.1 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS testing_db;"
+          mysql -h127.0.0.1 -uroot -proot -e "GRANT ALL PRIVILEGES ON testing_db.* TO 'newuser'@'%';"
+
+
+
       - name: Generate app key
         run: php artisan key:generate
 
