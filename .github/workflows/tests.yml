@@ -17,6 +17,7 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -65,4 +66,8 @@ jobs:
         run: php artisan migrate --force
 
       - name: Run tests
+        env:
+          DB_DATABASE: testing
+          DB_USERNAME: newuser
+          DB_PASSWORD: ${{ secrets.DB_NEWUSER_PASSWORD }}
         run: php artisan test --process-isolation
