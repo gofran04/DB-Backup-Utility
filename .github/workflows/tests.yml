@@ -5,59 +5,61 @@ on: [push, pull_request]
 jobs:
   laravel-tests:
     runs-on: ubuntu-latest
-
     services:
       mysql:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: Test-db-backup-utility
-          MYSQL_USER: ${{ secrets.DB_USERNAME }}
-          MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          MYSQL_DATABASE: laravel
+          MYSQL_USER: ${{ secrets.TEST_DB_USER }}
+          MYSQL_PASSWORD: ${{ secrets.TEST_DB_PASS }}
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -u${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }}"
+          --health-cmd="mysqladmin ping -h localhost -u${{ secrets.TEST_DB_USER }} -p${{ secrets.TEST_DB_PASS }}"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=3
+          --health-retries=5
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up PHP
+      - name: Copy .env.example to .env
+        run: cp .env.example .env
+
+      - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.2
-          extensions: mbstring, pdo, mysql, bcmath
+          php-version: '8.2'
+          extensions: mbstring, bcmath, pdo_mysql
           coverage: none
 
-      - name: Install Composer dependencies
-        run: composer install --no-progress --prefer-dist --optimize-autoloader
+      - name: Install dependencies
+        run: composer install --no-progress --no-suggest --prefer-dist
 
-      - name: Create .env file
+      - name: Set Laravel environment variables
         run: |
-          cp .env.example .env
           php artisan key:generate
-        env:
-          APP_KEY: base64:dummy
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: Test-db-backup-utility
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          echo "DB_CONNECTION=mysql" >> .env
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_PORT=3306" >> .env
+          echo "DB_DATABASE=Test-db-backup-utility" >> .env
+          echo "DB_USERNAME=${{ secrets.TEST_DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.TEST_DB_PASS }}" >> .env
+
+      - name: Wait for MySQL
+        run: |
+          for i in {1..10}; do
+            if mysqladmin ping -h127.0.0.1 -u${{ secrets.TEST_DB_USER }} -p${{ secrets.TEST_DB_PASS }} --silent; then
+              break
+            fi
+            echo "Waiting for MySQL..."
+            sleep 3
+          done
 
       - name: Run migrations
         run: php artisan migrate --force
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: Test-db-backup-utility
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
       - name: Run tests
         run: php artisan test --process-isolation
