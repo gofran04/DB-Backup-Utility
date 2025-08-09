@@ -92,7 +92,7 @@ class RestoreDatabaseCommandTest extends TestCase
                 'port'     => 3306,
                 'database' => 'TechFlex',
                 'username' => 'newuser',
-                'password' => Crypt::encryptString(env('TEST_DB_PASSWORD')), 
+                'password' => Crypt::encryptString(env('DB_NEWUSER_PASSWORD')), 
             ],
         ]);
 
