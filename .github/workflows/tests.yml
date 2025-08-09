@@ -10,7 +10,7 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: laravel
+          MYSQL_DATABASE: Test-db-backup-utility
           MYSQL_USER: ${{ secrets.TEST_DB_USER }}
           MYSQL_PASSWORD: ${{ secrets.TEST_DB_PASS }}
         ports:
