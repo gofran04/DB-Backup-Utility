@@ -90,7 +90,7 @@ class RestoreDatabaseCommandTest extends TestCase
                 'driver'   => 'mysql',
                 'host'     => '127.0.0.1',
                 'port'     => 3306,
-                'database' => 'TechFlex',
+                'database' => 'testing_db',
                 'username' => 'newuser',
                 'password' => Crypt::encryptString(env('DB_PASSWORD')), 
             ],
@@ -179,7 +179,7 @@ class RestoreDatabaseCommandTest extends TestCase
         $this->assertFileExists($fullPath.'.gz');
     }
 
-    private function createBackupForRestoreTest(string $dbName = 'restore_db_test'): array
+    private function createBackupForRestoreTest(string $dbName = 'testing_db'): array
     {
         $dbConnection = DatabaseConnection::factory()->create([
             'db_name' => $dbName,
