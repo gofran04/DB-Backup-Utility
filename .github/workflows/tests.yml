@@ -41,16 +41,15 @@ jobs:
       - name: Set Laravel environment variables
         run: |
           php artisan key:generate
-          echo "DB_CONNECTION=mysql" >> .env
-          echo "DB_HOST=127.0.0.1" >> .env
-          echo "DB_PORT=3306" >> .env
-          echo "DB_DATABASE=${{ secrets.TEST_DB_NAME }}" >> .env
-          echo "DB_USERNAME=${{ secrets.TEST_DB_USER }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.TEST_DB_PASS }}" >> .env
+          sed -i "s|DB_DATABASE=.*|DB_DATABASE=${{ secrets.TEST_DB_NAME }}|" .env
+          sed -i "s|DB_USERNAME=.*|DB_USERNAME=${{ secrets.TEST_DB_USER }}|" .env
+          sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=${{ secrets.TEST_DB_PASS }}|" .env
+          sed -i "s|DB_HOST=.*|DB_HOST=127.0.0.1|" .env
+          sed -i "s|DB_PORT=.*|DB_PORT=3306|" .env
 
       - name: Wait for MySQL
         run: |
-          for i in {1..10}; do
+          for i in {1..15}; do
             if mysqladmin ping -h127.0.0.1 -u${{ secrets.TEST_DB_USER }} -p${{ secrets.TEST_DB_PASS }} --silent; then
               break
             fi
