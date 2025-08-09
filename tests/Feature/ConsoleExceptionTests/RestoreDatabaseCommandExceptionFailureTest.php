@@ -80,7 +80,7 @@ class RestoreDatabaseCommandExceptionFailureTest extends TestCase
             ->assertExitCode(1);//failure
     }
 
-    private function createBackupForRestoreTest(string $dbName = 'restore_db_test'): array
+    private function createBackupForRestoreTest(string $dbName = 'testing_db'): array
     {
         $dbConnection = DatabaseConnection::factory()->create([
             'db_name' => $dbName,
