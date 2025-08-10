@@ -92,9 +92,9 @@ class BackupDatabaseCommandTest extends TestCase
                 'driver'   => 'mysql',
                 'host'     => '127.0.0.1',
                 'port'     => 3306,
-                'database' => 'TechFlex',
+                'database' => 'testing_db',
                 'username' => 'newuser',
-                'password' => Crypt::encryptString(env('TEST_DB_PASSWORD')), 
+                'password' => Crypt::encryptString(env('DB_PASSWORD')), 
             ],
         ]);
         $this->artisan('db:backup',['--profile' => 'temp_profile'])

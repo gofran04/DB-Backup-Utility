@@ -24,7 +24,7 @@ class DatabaseConnectionFactory extends Factory
             'type'            => 'mysql',
             'host'            => '127.0.0.1',
             'port'            => 3306,
-            'db_name'         => 'TechFlex',
+            'db_name'         => 'testing_db',
             'username'        => 'newuser',
             'password'        => Crypt::encryptString($plainPassword),
         ];
