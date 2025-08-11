@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\DB;
 use App\Models\DatabaseConnection;
 use Illuminate\Support\Facades\Crypt;
 
-
 class InstallBackupUtility extends Command
 {
 
@@ -125,8 +124,9 @@ This will set up your database connections, create tables, and configure default
         }
 
         $this->info("🎉 Installation complete! You can now run backups via CLI or API.");
-        $this->info("Next step: use `php artisan backup:quickstart` to schedule backups and run your first backup.");
-
+        $this->info("🎯 To run your first backup, use:");
+        $this->line("  php artisan db:backup {connection_id}  OR  php artisan db:backup --profile={profile_name}");
+        $this->info("Tip: Use `php artisan backup:config:list` to see all available profiles.");
         return Command::SUCCESS;
     }
 }
