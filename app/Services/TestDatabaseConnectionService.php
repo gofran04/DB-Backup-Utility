@@ -14,17 +14,7 @@ class TestDatabaseConnectionService
 
     public function testConnection($db_id) 
     {
-        try{
-            $this->createDynamicConnection($db_id);
-            return $this->successResponse(null,'Database connected successfully',200);
-        }catch(DatabaseConnectionException $e){
-            return $this->errorResponse(
-            'Database connection failed',
-            [
-                'type'    => $e->getType(),
-                'details' => $e->getMessage()
-            ], 422);
-        }
+        $this->createDynamicConnection($db_id);
     }
 
     public static function createDynamicConnection($db_id)
