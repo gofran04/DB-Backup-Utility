@@ -41,7 +41,7 @@ class TestDatabaseConnectionService
             'port'      => $databaseConnection->port,
             'database'  => $databaseConnection->db_name,
             'username'  => $databaseConnection->username,
-            'password'  => $databaseConnection->password,
+            'password'  => Crypt::decryptString($databaseConnection['password']),
             'charset'   => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix'    => '',
