@@ -86,7 +86,8 @@ DB_USERNAME=my_user
 DB_PASSWORD=my_password
 
 </details>
----
+
+
 ### 2.🔹 Installation Command (`program:install`)
 
 Before running any backup or restore commands, you must initialize the backup utility environment:
@@ -129,7 +130,7 @@ You can define reusable backup profiles in a JSON file located at:
   }
 }
 ```
----
+
 ### 4. Set Custom Storage Path in config/backup.php
 By default, backups are stored in:
 storage/app/backups
@@ -178,7 +179,7 @@ Displays local storage usage, including: storage usage,including: Total number o
 ### API (📬 Postman Collection)
 You can test all API endpoints easily using the official Postman collection:
 
-🔗 **[Download Collection](https://github.com/gofran04/DB-Backup-Utility/tree/dev/documentation/postman/DB_Backup_Utility_postman_collection.json.json)**
+🔗 **[Download Collection](https://github.com/gofran04/DB-Backup-Utility/blob/dev/documentation/postman/DB_Backup_Utility_postman_collection.json)**
 
 > Includes:
 > - All available API endpoints  
