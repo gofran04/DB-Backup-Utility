@@ -27,60 +27,64 @@ class RunScheduledBackups extends Command
         $now = Carbon::now();
         $schedules = BackupSchedule::with('dbConnection')->where('enabled', true)->get();
         
-        foreach ($schedules as $schedule) 
-        {
-            if ($this->isDue($schedule->cron_expression, $now)) 
+        if(!$schedules->isEmpty()){
+            foreach ($schedules as $schedule) 
             {
-                $backupJob = BackupJob::create([
-                    'database_connection_id' => $schedule->dbConnection->id,
-                    'status'                 => 'pending',
-                    'mechanism'              => 'automated',
-                    'started_at'             => now()
-                ]);
-
-                BackupLoggerService::logStart($backupJob);
-
-                // Use factory to resolve correct adapter
-                $adapter = (new DatabaseAdapterFactory())->make($schedule->dbConnection); 
-                
-                // get concrete implementation that was bound to this interface
-                $compressor = app(CompressionServiceInterface::class);
-                
-                // Run backup
-                $backupService = new DatabaseBackupService($adapter,$compressor);
-
-                $this->info("Running backup for schedule ID: {$schedule->id}");
-                try {
-                    $path = config('backup.storage_path') . '/backups';
-                    $result = $backupService->backupUsingDbId($schedule->dbConnection,$path); // assumes this method exists
-                    $backupJob->update([
-                        'status'       => 'completed',
-                        'backup_path'  => $result['relative_path'],
-                        'file_size'    => $result['file_size'],
-                        'completed_at' => now()
+                if ($this->isDue($schedule->cron_expression, $now)) 
+                {
+                    $backupJob = BackupJob::create([
+                        'database_connection_id' => $schedule->dbConnection->id,
+                        'status'                 => 'pending',
+                        'mechanism'              => 'automated',
+                        'started_at'             => now()
                     ]);
 
-                    BackupLoggerService::logSuccess($backupJob, $result['relative_path'], $result['file_size']);
+                    BackupLoggerService::logStart($backupJob);
 
-                    $this->info("✅ Backup completed for connection ID: {$schedule->dbConnection->id}");
-                } catch (DatabaseConnectionException | BackupFailedException | CompresionFailedException $e) {
-                    $backupJob->update([
-                        'status'        => 'failed',
-                        'error_message' => $e->getMessage(),
-                        'completed_at'  => now()
-                    ]);
+                    // Use factory to resolve correct adapter
+                    $adapter = (new DatabaseAdapterFactory())->make($schedule->dbConnection); 
+                    
+                    // get concrete implementation that was bound to this interface
+                    $compressor = app(CompressionServiceInterface::class);
+                    
+                    // Run backup
+                    $backupService = new DatabaseBackupService($adapter,$compressor);
 
-                    BackupLoggerService::logFailure($backupJob, $e);
-                    $this->error("❌ Backup failed: " . $e->getMessage());
+                    $this->info("Running backup for schedule ID: {$schedule->id}");
+                    try {
+                        $path = config('backup.storage_path') . '/backups';
+                        $result = $backupService->backupUsingDbId($schedule->dbConnection,$path); // assumes this method exists
+                        $backupJob->update([
+                            'status'       => 'completed',
+                            'backup_path'  => $result['relative_path'],
+                            'file_size'    => $result['file_size'],
+                            'completed_at' => now()
+                        ]);
 
-                    // Send alert via email
-                    Notification::route('mail', 'admin@example.com')
-                        ->notify(new ScheduledBackupFailed($backupJob));
+                        BackupLoggerService::logSuccess($backupJob, $result['relative_path'], $result['file_size']);
+
+                        $this->info("✅ Backup completed for connection ID: {$schedule->dbConnection->id}");
+                    } catch (DatabaseConnectionException | BackupFailedException | CompresionFailedException $e) {
+                        $backupJob->update([
+                            'status'        => 'failed',
+                            'error_message' => $e->getMessage(),
+                            'completed_at'  => now()
+                        ]);
+
+                        BackupLoggerService::logFailure($backupJob, $e);
+                        $this->error("❌ Backup failed: " . $e->getMessage());
+
+                        // Send alert via email
+                        Notification::route('mail', 'admin@example.com')
+                            ->notify(new ScheduledBackupFailed($backupJob));
+                    }
                 }
             }
+            return Command::SUCCESS;
+        }else{
+            $this->info('There are no scheduled backups to run.');
+            return 0;
         }
-
-        return Command::SUCCESS;
     }
 
     private function isDue(string $cronExpression, Carbon $now): bool
