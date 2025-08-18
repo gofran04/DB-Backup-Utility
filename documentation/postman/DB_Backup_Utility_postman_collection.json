@@ -1,0 +1,2959 @@
+{
+	"info": {
+		"_postman_id": "57d51aa8-6327-48ca-a52b-5a182c26cb0e",
+		"name": "DB Backup Utility",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12293457"
+	},
+	"item": [
+		{
+			"name": "DBConnections",
+			"item": [
+				{
+					"name": "DBConn-index",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzEyNDkzMDc1LCJleHAiOjE3MTI0OTY2NzUsIm5iZiI6MTcxMjQ5MzA3NSwianRpIjoiZkpwMWVHbXZtblJ2VUFRayIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.m3GcWZ64lMSTWIYgKTH2WVKvPA7ApNFhDWXs_CgVbMs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/database-connections",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"database-connections"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "DBConn-index",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": []
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/database-connections",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"database-connections"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 16:07:29 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 16:07:29 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Database connections retrieved successfully.\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"connection_name\": \"connection for SimpleCRM DB\",\n            \"type\": \"mysql\",\n            \"host\": \"127.0.0.1\",\n            \"port\": 3306,\n            \"db_name\": \"SimpleCRM\",\n            \"username\": \"newuser\",\n            \"deleted_at\": null,\n            \"created_at\": \"2025-06-11T17:12:29.000000Z\",\n            \"updated_at\": \"2025-06-11T17:38:07.000000Z\"\n        },\n        {\n            \"id\": 2,\n            \"connection_name\": \"connection for TechFlex DB\",\n            \"type\": \"mysql\",\n            \"host\": \"127.0.0.1\",\n            \"port\": 3306,\n            \"db_name\": \"TechFlex\",\n            \"username\": \"newuser\",\n            \"deleted_at\": null,\n            \"created_at\": \"2025-06-11T17:13:16.000000Z\",\n            \"updated_at\": \"2025-06-11T17:41:25.000000Z\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "DBConn-show",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzEyNDkzMDc1LCJleHAiOjE3MTI0OTY2NzUsIm5iZiI6MTcxMjQ5MzA3NSwianRpIjoiZkpwMWVHbXZtblJ2VUFRayIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.m3GcWZ64lMSTWIYgKTH2WVKvPA7ApNFhDWXs_CgVbMs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/database-connections/2",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"database-connections",
+								"2"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "DBConn-show",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/database-connections/2",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"database-connections",
+										"2"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 16:09:24 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 16:09:24 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Database connection retrieved.\",\n    \"data\": {\n        \"id\": 2,\n        \"connection_name\": \"connection for TechFlex DB\",\n        \"type\": \"mysql\",\n        \"host\": \"127.0.0.1\",\n        \"port\": 3306,\n        \"db_name\": \"TechFlex\",\n        \"username\": \"newuser\",\n        \"deleted_at\": null,\n        \"created_at\": \"2025-06-11T17:13:16.000000Z\",\n        \"updated_at\": \"2025-06-11T17:41:25.000000Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "DBConn-store",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "connection_name",
+									"value": "Conn for TechFlex DB",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "mysql",
+									"type": "text"
+								},
+								{
+									"key": "host",
+									"value": "127.0.0.1",
+									"type": "text"
+								},
+								{
+									"key": "port",
+									"value": "3306",
+									"type": "text"
+								},
+								{
+									"key": "db_name",
+									"value": "TechFlex",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "newuser",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "newuserpass",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "postgres",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "password",
+									"value": "new_password",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "db_name",
+									"value": "TestBackup",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "type",
+									"value": "postgresql",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "port",
+									"value": "5432",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/database-connections",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"database-connections"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "DBConn-store",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "connection_name",
+											"value": "connection for deploy DB",
+											"type": "text"
+										},
+										{
+											"key": "type",
+											"value": "mysql",
+											"type": "text"
+										},
+										{
+											"key": "host",
+											"value": "127..0.0.1",
+											"type": "text"
+										},
+										{
+											"key": "port",
+											"value": "3306",
+											"type": "text"
+										},
+										{
+											"key": "db_name",
+											"value": "deploy",
+											"type": "text"
+										},
+										{
+											"key": "username",
+											"value": "newuser",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "newuserpass",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/database-connections",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"database-connections"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 16:10:57 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 16:10:57 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Database connection created successfully.\",\n    \"data\": {\n        \"connection_name\": \"connection for deploy DB\",\n        \"type\": \"mysql\",\n        \"host\": \"127..0.0.1\",\n        \"port\": \"3306\",\n        \"db_name\": \"deploy\",\n        \"username\": \"newuser\",\n        \"updated_at\": \"2025-06-23T16:10:57.000000Z\",\n        \"created_at\": \"2025-06-23T16:10:57.000000Z\",\n        \"id\": 3\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "DBConn-testConnection",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "db_id",
+									"value": "2",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/test-db-connection",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"test-db-connection"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success-DBConn-testConnection",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "db_id",
+											"value": "2",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/test-db-connection",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"test-db-connection"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.29"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 18 Aug 2025 21:50:29 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Database connected successfully\",\n    \"data\": null\n}"
+						},
+						{
+							"name": "Faild-invalid_credentials",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "db_id",
+											"value": "2",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/test-db-connection",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"test-db-connection"
+									]
+								}
+							},
+							"status": "Unprocessable Content",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.29"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 18 Aug 2025 21:51:44 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"error\",\n    \"message\": \"Database connection failed\",\n    \"errors\": {\n        \"type\": \"invalid_credentials\",\n        \"details\": \"Invalid database credentials.\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "DBConn-update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzIwODAwNDYyLCJleHAiOjE3MjA4MDQwNjIsIm5iZiI6MTcyMDgwMDQ2MiwianRpIjoicGtGWmhYQ3dQaEhIa0ZVSiIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.FogWYszXCTOI9MXITv0r3e0oW5YGz8X3rBQM6Eg2qpY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "connection_name",
+									"value": "connection for TechFlex DB",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "mysql",
+									"type": "text"
+								},
+								{
+									"key": "host",
+									"value": "127.0.0.1",
+									"type": "text"
+								},
+								{
+									"key": "port",
+									"value": "3306",
+									"type": "text"
+								},
+								{
+									"key": "db_name",
+									"value": "TechFlex",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "newuser",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "newuserpass",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/database-connections/3?_method=put",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"database-connections",
+								"3"
+							],
+							"query": [
+								{
+									"key": "_method",
+									"value": "put"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "DBConn-update",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "connection_name",
+											"value": "connection for Deploy DB",
+											"type": "text"
+										},
+										{
+											"key": "type",
+											"value": "mysql",
+											"type": "text"
+										},
+										{
+											"key": "host",
+											"value": "127.0.0.1",
+											"type": "text"
+										},
+										{
+											"key": "port",
+											"value": "3306",
+											"type": "text"
+										},
+										{
+											"key": "db_name",
+											"value": "deploy",
+											"type": "text"
+										},
+										{
+											"key": "username",
+											"value": "newuser",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "newuserpass",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/database-connections/3?_method=put",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"database-connections",
+										"3"
+									],
+									"query": [
+										{
+											"key": "_method",
+											"value": "put"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 16:13:37 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 16:13:37 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Database connection updated successfully.\",\n    \"data\": {\n        \"id\": 3,\n        \"connection_name\": \"connection for Deploy DB\",\n        \"type\": \"mysql\",\n        \"host\": \"127.0.0.1\",\n        \"port\": 3306,\n        \"db_name\": \"deploy\",\n        \"username\": \"newuser\",\n        \"deleted_at\": null,\n        \"created_at\": \"2025-06-23T16:10:57.000000Z\",\n        \"updated_at\": \"2025-06-23T16:13:37.000000Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "DBConn-delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzEyNDkzMDc1LCJleHAiOjE3MTI0OTY2NzUsIm5iZiI6MTcxMjQ5MzA3NSwianRpIjoiZkpwMWVHbXZtblJ2VUFRayIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.m3GcWZ64lMSTWIYgKTH2WVKvPA7ApNFhDWXs_CgVbMs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/database-connections/3",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"database-connections",
+								"3"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "DBConn-delete",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/database-connections/3",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"database-connections",
+										"3"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 16:14:29 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 16:14:29 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Database connection deleted successfully.\",\n    \"data\": null\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Backup-Jobs",
+			"item": [
+				{
+					"name": "Backup-index",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzEyNDkzMDc1LCJleHAiOjE3MTI0OTY2NzUsIm5iZiI6MTcxMjQ5MzA3NSwianRpIjoiZkpwMWVHbXZtblJ2VUFRayIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.m3GcWZ64lMSTWIYgKTH2WVKvPA7ApNFhDWXs_CgVbMs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/backup-jobs",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"backup-jobs"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Backup-index",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": []
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/backup-jobs",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"backup-jobs"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 17:19:03 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 17:19:03 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Backup Jobs retrieved\",\n    \"data\": [\n        {\n            \"id\": 8,\n            \"database_connection_id\": 2,\n            \"backup_path\": null,\n            \"status\": \"pending\",\n            \"started_at\": \"2025-06-17 14:30:49\",\n            \"completed_at\": null,\n            \"file_size\": null,\n            \"error_message\": null,\n            \"deleted_at\": null,\n            \"created_at\": \"2025-06-17T14:30:49.000000Z\",\n            \"updated_at\": \"2025-06-17T14:30:49.000000Z\"\n        },\n        {\n            \"id\": 10,\n            \"database_connection_id\": 2,\n            \"backup_path\": null,\n            \"status\": \"failed\",\n            \"started_at\": \"2025-06-17 17:32:33\",\n            \"completed_at\": \"2025-06-17 14:32:33\",\n            \"file_size\": null,\n            \"error_message\": \"Undefined array key \\\"file_size\\\"\",\n            \"deleted_at\": null,\n            \"created_at\": \"2025-06-17T14:32:33.000000Z\",\n            \"updated_at\": \"2025-06-17T14:32:33.000000Z\"\n        },\n        {\n            \"id\": 14,\n            \"database_connection_id\": 1,\n            \"backup_path\": \"/app/backups/SimpleCRM_backup_20250617_213047.sql\",\n            \"status\": \"completed\",\n            \"started_at\": \"2025-06-17 22:30:47\",\n            \"completed_at\": \"2025-06-17 21:30:47\",\n            \"file_size\": 0,\n            \"error_message\": null,\n            \"deleted_at\": null,\n            \"created_at\": \"2025-06-17T21:30:47.000000Z\",\n            \"updated_at\": \"2025-06-17T21:30:47.000000Z\"\n        },\n        {\n            \"id\": 24,\n            \"database_connection_id\": 1,\n            \"backup_path\": \"/home/ghofran/Documents/workspace/SideProjects/db-backup-utility/storage/app/backups/SimpleCRM_backup_20250617_215913.sql\",\n            \"status\": \"completed\",\n            \"started_at\": \"2025-06-17 22:59:13\",\n            \"completed_at\": \"2025-06-17 21:59:13\",\n            \"file_size\": 29852,\n            \"error_message\": null,\n            \"deleted_at\": null,\n            \"created_at\": \"2025-06-17T21:59:13.000000Z\",\n            \"updated_at\": \"2025-06-17T21:59:13.000000Z\"\n        },\n        {\n            \"id\": 33,\n            \"database_connection_id\": 1,\n            \"backup_path\": null,\n            \"status\": \"failed\",\n            \"started_at\": \"2025-06-18 16:25:33\",\n            \"completed_at\": \"2025-06-18 13:25:33\",\n            \"file_size\": null,\n            \"error_message\": \"Undefined array key \\\"file_path\\\"\",\n            \"deleted_at\": null,\n            \"created_at\": \"2025-06-18T13:25:32.000000Z\",\n            \"updated_at\": \"2025-06-18T13:25:33.000000Z\"\n        },\n        {\n            \"id\": 35,\n            \"database_connection_id\": 1,\n            \"backup_path\": \"backups/SimpleCRM_backup_20250618_141152.sql\",\n            \"status\": \"completed\",\n            \"started_at\": \"2025-06-18 17:11:52\",\n            \"completed_at\": \"2025-06-18 14:11:52\",\n            \"file_size\": 0,\n            \"error_message\": null,\n            \"deleted_at\": null,\n            \"created_at\": \"2025-06-18T14:11:52.000000Z\",\n            \"updated_at\": \"2025-06-18T14:11:52.000000Z\"\n        },\n        {\n            \"id\": 36,\n            \"database_connection_id\": 1,\n            \"backup_path\": null,\n            \"status\": \"failed\",\n            \"started_at\": \"2025-06-18 17:13:22\",\n            \"completed_at\": \"2025-06-18 14:13:22\",\n            \"file_size\": null,\n            \"error_message\": \"Undefined array key \\\"file_path\\\"\",\n            \"deleted_at\": null,\n            \"created_at\": \"2025-06-18T14:13:21.000000Z\",\n            \"updated_at\": \"2025-06-18T14:13:22.000000Z\"\n        },\n        {\n            \"id\": 55,\n            \"database_connection_id\": 1,\n            \"backup_path\": null,\n            \"status\": \"pending\",\n            \"started_at\": \"2025-06-21 13:38:31\",\n            \"completed_at\": null,\n            \"file_size\": null,\n            \"error_message\": null,\n            \"deleted_at\": null,\n            \"created_at\": \"2025-06-21T13:38:31.000000Z\",\n            \"updated_at\": \"2025-06-21T13:38:31.000000Z\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Backup-show",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzEyNDkzMDc1LCJleHAiOjE3MTI0OTY2NzUsIm5iZiI6MTcxMjQ5MzA3NSwianRpIjoiZkpwMWVHbXZtblJ2VUFRayIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.m3GcWZ64lMSTWIYgKTH2WVKvPA7ApNFhDWXs_CgVbMs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/backup-jobs/1",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"backup-jobs",
+								"1"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Backup-show",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/backup-jobs/24",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"backup-jobs",
+										"24"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 17:20:26 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 17:20:26 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Backup Job retrieved.\",\n    \"data\": {\n        \"id\": 24,\n        \"database_connection_id\": 1,\n        \"backup_path\": \"/home/ghofran/Documents/workspace/SideProjects/db-backup-utility/storage/app/backups/SimpleCRM_backup_20250617_215913.sql\",\n        \"status\": \"completed\",\n        \"started_at\": \"2025-06-17 22:59:13\",\n        \"completed_at\": \"2025-06-17 21:59:13\",\n        \"file_size\": 29852,\n        \"error_message\": null,\n        \"deleted_at\": null,\n        \"created_at\": \"2025-06-17T21:59:13.000000Z\",\n        \"updated_at\": \"2025-06-17T21:59:13.000000Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Backup-store",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "db_id",
+									"value": "1",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/backup-jobs",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"backup-jobs"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "success DB backup",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "db_id",
+											"value": "1",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/backup-jobs",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"backup-jobs"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 17:27:28 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 17:27:28 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Database backup completed successfully\",\n    \"data\": {\n        \"id\": 95,\n        \"database_connection_id\": 1,\n        \"backup_path\": \"backups/SimpleCRM_backup_20250623_172728.sql\",\n        \"status\": \"completed\",\n        \"started_at\": \"2025-06-23 20:27:28\",\n        \"completed_at\": \"2025-06-23 17:27:28\",\n        \"file_size\": 29852,\n        \"error_message\": null,\n        \"deleted_at\": null,\n        \"created_at\": \"2025-06-23T17:27:28.000000Z\",\n        \"updated_at\": \"2025-06-23T17:27:28.000000Z\"\n    }\n}"
+						},
+						{
+							"name": "Failed backup",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "db_id",
+											"value": "1",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/backup-jobs",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"backup-jobs"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 17:34:27 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 17:34:27 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"error\",\n    \"message\": \"Backup failed\",\n    \"errors\": {\n        \"type\": \"unknown\",\n        \"message\": \"Backup failed: \"\n    }\n}"
+						},
+						{
+							"name": "Failed host_unreachable",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "db_id",
+											"value": "1",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/backup-jobs",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"backup-jobs"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 26 Jun 2025 16:33:37 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 26 Jun 2025 16:33:37 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"error\",\n    \"message\": \"Backup failed\",\n    \"errors\": {\n        \"type\": \"host_unreachable\",\n        \"message\": \"Unknown MySQL server host.\"\n    }\n}"
+						},
+						{
+							"name": "Failed Invalid db credentials",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "db_id",
+											"value": "1",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/backup-jobs",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"backup-jobs"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 26 Jun 2025 16:35:59 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 26 Jun 2025 16:35:59 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"error\",\n    \"message\": \"Backup failed\",\n    \"errors\": {\n        \"type\": \"invalid_credentials\",\n        \"message\": \"Invalid database credentials.\"\n    }\n}"
+						},
+						{
+							"name": "Failed db backup operation timed out.",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "db_id",
+											"value": "1",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/backup-jobs",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"backup-jobs"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 26 Jun 2025 16:37:02 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 26 Jun 2025 16:37:02 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"error\",\n    \"message\": \"Backup failed\",\n    \"errors\": {\n        \"type\": \"timeout\",\n        \"message\": \"Database backup operation timed out.\"\n    }\n}"
+						},
+						{
+							"name": "Failed mysqldump command not found",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "db_id",
+											"value": "1",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/backup-jobs",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"backup-jobs"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 26 Jun 2025 16:45:18 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 26 Jun 2025 16:45:18 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"error\",\n    \"message\": \"Backup failed\",\n    \"errors\": {\n        \"type\": \"mysqldump_missing\",\n        \"message\": \"mysqldump command not found.\"\n    }\n}"
+						},
+						{
+							"name": "Failed Permission denied while writing backup file",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "db_id",
+											"value": "1",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/backup-jobs",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"backup-jobs"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 26 Jun 2025 16:50:09 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 26 Jun 2025 16:50:09 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"error\",\n    \"message\": \"Backup failed\",\n    \"errors\": {\n        \"type\": \"permission_denied\",\n        \"message\": \"Permission denied while writing backup file.\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Backup-delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzEyNDkzMDc1LCJleHAiOjE3MTI0OTY2NzUsIm5iZiI6MTcxMjQ5MzA3NSwianRpIjoiZkpwMWVHbXZtblJ2VUFRayIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.m3GcWZ64lMSTWIYgKTH2WVKvPA7ApNFhDWXs_CgVbMs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/backup-jobs/2",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"backup-jobs",
+								"2"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Backup file and record deleted successfully",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/backup-jobs/95",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"backup-jobs",
+										"95"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 17:40:12 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 17:40:12 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Backup file and record deleted successfully.\",\n    \"data\": null\n}"
+						},
+						{
+							"name": "Backup record deleted. File was already missing",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/backup-jobs/100",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"backup-jobs",
+										"100"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 17:42:33 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 23 Jun 2025 17:42:33 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Backup record deleted. File was already missing.\",\n    \"data\": null\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Schedules",
+			"item": [
+				{
+					"name": "schedules-index",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzEyNDkzMDc1LCJleHAiOjE3MTI0OTY2NzUsIm5iZiI6MTcxMjQ5MzA3NSwianRpIjoiZkpwMWVHbXZtblJ2VUFRayIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.m3GcWZ64lMSTWIYgKTH2WVKvPA7ApNFhDWXs_CgVbMs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/backup-schedules",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"backup-schedules"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "schedules-index",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": []
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/backup-schedules",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"backup-schedules"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.29"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 18 Aug 2025 20:33:46 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Task schedules retrieved\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"db_connection_id\": 1,\n            \"frequency\": \"every_minute\",\n            \"cron_expression\": \"* * * * *\",\n            \"enabled\": false,\n            \"deleted_at\": null,\n            \"created_at\": \"2025-08-18T20:31:53.000000Z\",\n            \"updated_at\": \"2025-08-18T20:33:00.000000Z\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "schedules-show",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzEyNDkzMDc1LCJleHAiOjE3MTI0OTY2NzUsIm5iZiI6MTcxMjQ5MzA3NSwianRpIjoiZkpwMWVHbXZtblJ2VUFRayIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.m3GcWZ64lMSTWIYgKTH2WVKvPA7ApNFhDWXs_CgVbMs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/backup-schedules/1",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"backup-schedules",
+								"1"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "schedules-show",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/backup-schedules/1",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"backup-schedules",
+										"1"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.29"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 18 Aug 2025 20:33:27 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Task schedule retrieved.\",\n    \"data\": {\n        \"id\": 1,\n        \"db_connection_id\": 1,\n        \"frequency\": \"every_minute\",\n        \"cron_expression\": \"* * * * *\",\n        \"enabled\": false,\n        \"deleted_at\": null,\n        \"created_at\": \"2025-08-18T20:31:53.000000Z\",\n        \"updated_at\": \"2025-08-18T20:33:00.000000Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "schedules-toggle",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzEyNDkzMDc1LCJleHAiOjE3MTI0OTY2NzUsIm5iZiI6MTcxMjQ5MzA3NSwianRpIjoiZkpwMWVHbXZtblJ2VUFRayIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.m3GcWZ64lMSTWIYgKTH2WVKvPA7ApNFhDWXs_CgVbMs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/backup-schedules/1/toggle",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"backup-schedules",
+								"1",
+								"toggle"
+							],
+							"query": [
+								{
+									"key": "_method",
+									"value": "put",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "schedules-toggle",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": []
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/backup-schedules/1/toggle",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"backup-schedules",
+										"1",
+										"toggle"
+									],
+									"query": [
+										{
+											"key": "_method",
+											"value": "put",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"status": "Accepted",
+							"code": 202,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.29"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 18 Aug 2025 20:33:00 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Task Schedule Status Changed successfully\",\n    \"data\": {\n        \"id\": 1,\n        \"db_connection_id\": 1,\n        \"frequency\": \"every_minute\",\n        \"cron_expression\": \"* * * * *\",\n        \"enabled\": false,\n        \"deleted_at\": null,\n        \"created_at\": \"2025-08-18T20:31:53.000000Z\",\n        \"updated_at\": \"2025-08-18T20:33:00.000000Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "schedules-store",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "db_connection_id",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "enabled",
+									"value": "0",
+									"type": "text"
+								},
+								{
+									"key": "frequency",
+									"value": "every_5_minutes",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/backup-schedules",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"backup-schedules"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "schedules-store",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "db_connection_id",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "enabled",
+											"value": "0",
+											"type": "text"
+										},
+										{
+											"key": "frequency",
+											"value": "every_5_minutes",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/backup-schedules",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"backup-schedules"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.29"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 18 Aug 2025 20:31:53 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Task Schedule created\",\n    \"data\": {\n        \"db_connection_id\": \"1\",\n        \"frequency\": \"every_5_minutes\",\n        \"cron_expression\": \"*/5 * * * *\",\n        \"enabled\": true,\n        \"updated_at\": \"2025-08-18T20:31:53.000000Z\",\n        \"created_at\": \"2025-08-18T20:31:53.000000Z\",\n        \"id\": 1\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "schedules-delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzEyNDkzMDc1LCJleHAiOjE3MTI0OTY2NzUsIm5iZiI6MTcxMjQ5MzA3NSwianRpIjoiZkpwMWVHbXZtblJ2VUFRayIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.m3GcWZ64lMSTWIYgKTH2WVKvPA7ApNFhDWXs_CgVbMs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/backup-schedules/1",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"backup-schedules",
+								"1"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "schedules-delete",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/backup-schedules/1",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"backup-schedules",
+										"1"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.29"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 18 Aug 2025 20:34:05 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Task Schedule deleted successfully.\",\n    \"data\": null\n}"
+						}
+					]
+				},
+				{
+					"name": "schedules-update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "db_connection_id",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "frequency",
+									"value": "every_minute",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/backup-schedules/1?_method=put",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"backup-schedules",
+								"1"
+							],
+							"query": [
+								{
+									"key": "_method",
+									"value": "put"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "schedules-update",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "db_connection_id",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "frequency",
+											"value": "every_minute",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/backup-schedules/1?_method=put",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"backup-schedules",
+										"1"
+									],
+									"query": [
+										{
+											"key": "_method",
+											"value": "put"
+										}
+									]
+								}
+							},
+							"status": "Accepted",
+							"code": 202,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.29"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 18 Aug 2025 20:32:25 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Task Schedule updated successfully\",\n    \"data\": {\n        \"id\": 1,\n        \"db_connection_id\": 1,\n        \"frequency\": \"every_minute\",\n        \"cron_expression\": \"* * * * *\",\n        \"enabled\": true,\n        \"deleted_at\": null,\n        \"created_at\": \"2025-08-18T20:31:53.000000Z\",\n        \"updated_at\": \"2025-08-18T20:32:25.000000Z\"\n    }\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Restore-DB",
+			"item": [
+				{
+					"name": "Restore-DB",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "db_id",
+									"value": "2",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "db_profile",
+									"value": "prof2",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"value": "backups/deploy_backup_20250818_175312.sql.gz",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"value": "backups/TestBackup_temp_6883a3fbdcf2d_backup_20250725_153419.sql",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "file",
+									"value": "backups/testrestore_temp_68700fefd828b_backup_20250710_190935.sql.gz",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "file",
+									"value": "backups/restore_temp_68701ad296197_backup_20250710_195602.sql.gz",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/restore",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"restore"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Restore-Failed file not exist",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "db_id",
+											"value": "5",
+											"type": "text"
+										},
+										{
+											"key": "db_profile",
+											"value": "testa",
+											"type": "text",
+											"disabled": true
+										},
+										{
+											"key": "file",
+											"value": "storage/app/backups/TechFlex_backup_20250626_181654.sqll",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/restore",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"restore"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 29 Jun 2025 07:29:46 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 29 Jun 2025 07:29:46 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"message\": \"Backup file not found: /home/ghofran/Documents/workspace/SideProjects/db-backup-utility/storage/app/backups/TechFlex_backup_20250626_181654.sqll\"\n    },\n    404\n]"
+						},
+						{
+							"name": "Restore-success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "db_id",
+											"value": "5",
+											"type": "text"
+										},
+										{
+											"key": "db_profile",
+											"value": "testa",
+											"type": "text",
+											"disabled": true
+										},
+										{
+											"key": "file",
+											"value": "storage/app/backups/TechFlex_backup_20250626_181654.sql",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/restore",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"restore"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 29 Jun 2025 07:30:36 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 29 Jun 2025 07:30:36 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"message\": \"✅ Database restored successfully.\"\n    },\n    200\n]"
+						},
+						{
+							"name": "Restore-Failed Profile  not found",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "db_id",
+											"value": "5",
+											"type": "text",
+											"disabled": true
+										},
+										{
+											"key": "db_profile",
+											"value": "testam",
+											"type": "text"
+										},
+										{
+											"key": "file",
+											"value": "storage/app/backups/TechFlex_backup_20250626_181654.sql",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://127.0.0.1:8000/api/restore",
+									"protocol": "http",
+									"host": [
+										"127",
+										"0",
+										"0",
+										"1"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"restore"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Host",
+									"value": "127.0.0.1:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 29 Jun 2025 07:31:51 GMT"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 29 Jun 2025 07:31:51 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, private"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"message\": \"Profile 'testam' not found.\"\n    },\n    404\n]"
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -178,7 +178,7 @@ Displays local storage usage, including: storage usage,including: Total number o
 ### API (📬 Postman Collection)
 You can test all API endpoints easily using the official Postman collection:
 
-🔗 **[Download Collection](https://github.com/<your-username>/<your-repo>/blob/main/docs/postman/db-backup-api.postman_collection.json)**
+🔗 **[Download Collection](https://github.com/gofran04/DB-Backup-Utility/tree/dev/documentation/postman/DB_Backup_Utility_postman_collection.json.json)**
 
 > Includes:
 > - All available API endpoints  
