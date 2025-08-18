@@ -43,7 +43,10 @@ class DatabaseConnectionController extends Controller
 
     public function update(CreateOrUpdateDatabaseConnectionRequest $request, DatabaseConnection $databaseConnection)
     {
-        $databaseConnection->update($request->validated());
+        $inputs = $request->validated();
+        $inputs['password'] = Crypt::encryptString($inputs['password']);
+
+        $databaseConnection->update($inputs);
 
         return $this->successResponse(
             new DatabaseConnectionResource($databaseConnection->refresh()),

@@ -14,17 +14,7 @@ class TestDatabaseConnectionService
 
     public function testConnection($db_id) 
     {
-        try{
-            $this->createDynamicConnection($db_id);
-            return $this->successResponse(null,'Database connected successfully',200);
-        }catch(DatabaseConnectionException $e){
-            return $this->errorResponse(
-            'Database connection failed',
-            [
-                'type'    => $e->getType(),
-                'details' => $e->getMessage()
-            ], 422);
-        }
+        $this->createDynamicConnection($db_id);
     }
 
     public static function createDynamicConnection($db_id)
@@ -41,7 +31,7 @@ class TestDatabaseConnectionService
             'port'      => $databaseConnection->port,
             'database'  => $databaseConnection->db_name,
             'username'  => $databaseConnection->username,
-            'password'  => $databaseConnection->password,
+            'password'  => Crypt::decryptString($databaseConnection['password']),
             'charset'   => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix'    => '',
