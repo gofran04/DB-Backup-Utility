@@ -39,7 +39,7 @@ class BackupJobController extends Controller
         ]);
         
         // Dispatch to queue
-        ProcessDatabaseBackup::dispatch($backupJob->id);
+        ProcessDatabaseBackup::dispatch($backupJob->id)->onQueue('backups');;
 
         return $this->successResponse(
             new BackupJobResource($backupJob),
