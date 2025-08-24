@@ -4,18 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreBackupJobRequest;
 use App\Models\BackupJob;
-use App\Services\DatabaseBackupService;
-use App\Services\BackupLoggerService;
 use App\Http\Resources\BackupJobResource;
 use Illuminate\Support\Facades\Log;
-use App\Exceptions\DatabaseConnectionException;
-use App\Exceptions\BackupFailedException;
-use App\Exceptions\CompresionFailedException;
 use Symfony\Component\HttpFoundation\Response;
 use App\Traits\ApiResponseTrait;
 use App\Models\DatabaseConnection;
-use App\Factories\DatabaseAdapterFactory;
-use App\Services\Compression\CompressionServiceInterface;
+use App\Jobs\ProcessDatabaseBackup;
 
 
 class BackupJobController extends Controller
@@ -43,76 +37,14 @@ class BackupJobController extends Controller
             'mechanism'              => 'manual',
             'started_at'             => now()
         ]);
-
-        // Log at the start of backup:
-        BackupLoggerService::logStart($backupJob);
-
-        // Run backup via backup service
-        try {
-            // Use factory to resolve correct adapter
-            $adapterFactory = new DatabaseAdapterFactory();
-            $adapter = $adapterFactory->make($db_connection);
-
-            // get concrete implementation that was bound to this interface
-            $compressor = app(CompressionServiceInterface::class);
-            
-            // Run backup
-            $backupService = new DatabaseBackupService($adapter,$compressor);
-            $path = config('backup.storage_path') . '/backups';
-            $backupResult = $backupService->backupUsingDbId($db_connection, $path);// pass the absolute path 
-           
-            $backupJob->update([ // Update job record with success
-                'status'       => 'completed',
-                'backup_path'  => $backupResult['relative_path'],
-                'file_size'    => $backupResult['file_size'],
-                'completed_at' => now()
-                ]);
-
-            // log after backup operation success:
-            BackupLoggerService::logSuccess($backupJob, $backupResult['relative_path'], $backupResult['file_size']);
-           
-            } catch (DatabaseConnectionException $e) {
-                return $this->errorResponse(
-                    'Database connection failed',
-                    [
-                        'type'    => $e->getType(),
-                        'message' => $e->getMessage()
-                    ],
-                    Response::HTTP_UNPROCESSABLE_ENTITY
-                );
-            } catch (BackupFailedException $e) { // Update job record with failure
-                $backupJob->update([
-                    'status'        => 'failed',
-                    'error_message' => $e->getMessage(),
-                    'completed_at'  => now()
-                ]);
-
-                // On failure:
-                BackupLoggerService::logFailure($backupJob, $e);
-
-                return $this->errorResponse(
-                    'Backup failed',
-                    [
-                        'type'    => $e->getType(),
-                        'message' => $e->getMessage(),
-                    ],
-                    Response::HTTP_INTERNAL_SERVER_ERROR
-                );
-            }catch (CompresionFailedException $e) {
-                return $this->errorResponse(
-                    'Compression failed',
-                    [
-                        'type'    => $e->getType(),
-                        'message' => $e->getMessage()
-                    ],
-                    Response::HTTP_UNPROCESSABLE_ENTITY
-                );
-            }
+        
+        // Dispatch to queue
+        ProcessDatabaseBackup::dispatch($backupJob->id);
 
         return $this->successResponse(
-            new BackupJobResource($backupJob->refresh()),
-            'Database backup completed successfully',
-            Response::HTTP_CREATED
+            new BackupJobResource($backupJob),
+            'Backup job queued successfully',
+            Response::HTTP_ACCEPTED
         );
     }
 
