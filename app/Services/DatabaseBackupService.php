@@ -74,8 +74,10 @@ class DatabaseBackupService
             throw $e;
         }
         
-        // File name format
-        $filename = "{$profile['database']}_backup_" . date('Ymd_His') . ".sql";
+        // Generate filename and paths
+        $connectionName = 'temp_' . uniqid();
+        $filename = $profile['database'].'_'.$connectionName . '_backup_' . now()->format('Ymd_His') . '.sql';
+
 
         $absolutePath = rtrim($outputPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $filename;
         $relativePath = str_replace(storage_path('app/'), '', $absolutePath);
