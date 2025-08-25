@@ -4,12 +4,9 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Services\ConfigService;
-use App\Services\DatabaseBackupService;
 use App\Models\DatabaseConnection;
 use App\Exceptions\BackupFailedException;
 use Illuminate\Support\Facades\Log;
-use App\Factories\DatabaseAdapterFactory;
-use App\Services\Compression\CompressionServiceInterface;
 use App\Models\BackupJob;
 use App\Jobs\ProcessDatabaseBackup;
 
