@@ -4,12 +4,11 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Services\ConfigService;
-use App\Services\DatabaseBackupService;
 use App\Models\DatabaseConnection;
 use App\Exceptions\BackupFailedException;
 use Illuminate\Support\Facades\Log;
-use App\Factories\DatabaseAdapterFactory;
-use App\Services\Compression\CompressionServiceInterface;
+use App\Models\BackupJob;
+use App\Jobs\ProcessDatabaseBackup;
 
 class BackupDatabase extends Command
 {
@@ -47,8 +46,7 @@ class BackupDatabase extends Command
                 'source' => 'CLI',
                 'invoked_at' => now()->toDateTimeString()
             ];
-
-            $dbConfig = null;
+            $db_name = null;
 
             if ($profileName) // Handle profile-based backup
             {
@@ -63,19 +61,19 @@ class BackupDatabase extends Command
                     $this->error("❌ Profile '$profileName' not found.");
                     return Command::FAILURE;
                 }
+                     
+                $db_name = $profiles[$profileName]['database'];
 
-                $dbConfig = $profiles[$profileName];
-                           
-                $adapter = (new DatabaseAdapterFactory())->makeFromProfile($dbConfig);
-                $compressor = app(CompressionServiceInterface::class);
-                $backupService = new DatabaseBackupService($adapter, $compressor);
+                // Create backup job entry in DB
+                $backupJob = BackupJob::create([
+                    'profile_name' => $profileName,
+                    'status'       => 'pending',
+                    'mechanism'    => 'manual',
+                    'started_at'   => now()
+                ]);
 
-                $result = $backupService->backupUsingProfile($dbConfig, $outputPath); // assuming this method exists            
-            }
-            else // Handle ID-based backup
-            {
-                // Log at the start of backup
-                $logContext['db_id'] = $id;
+            }else{ // Handle ID-based backup
+                $logContext['db_id'] = $id; // Log at the start of backup
                 Log::info("🔧 CLI Backup Started (DB ID)", $logContext);
 
                 $this->info("🔍 Loading DB config from database_connections table (ID: $id)");
@@ -87,27 +85,26 @@ class BackupDatabase extends Command
                     return Command::FAILURE;
                 }
 
-                $adapter = (new DatabaseAdapterFactory())->make($connection);
-                $compressor = app(CompressionServiceInterface::class);
-                $backupService = new DatabaseBackupService($adapter, $compressor);
+                $db_name = $connection->db_name;
 
-                $result = $backupService->backupUsingDbId($connection, $outputPath);
+                // Create backup job entry in DB
+                $backupJob = BackupJob::create([
+                    'database_connection_id' => $id,
+                    'status'                 => 'pending',
+                    'mechanism'              => 'manual',
+                    'started_at'             => now()
+                ]);
             }
 
-            $duration = now()->diffInSeconds($logContext['invoked_at']);
-
-            // Handle success response
-            $this->info("✅ Backup successful!");
-            $this->line("📁 File Path: storage/app{$result['relative_path']}");
-            $this->line("📦 Size: {$result['file_size']} bytes");
-
-            //log after backup operation success
-            Log::info("✅ CLI Backup Success", array_merge($logContext, [
-                'file_path' => $result['relative_path'],
-                'file_size' => $result['file_size'],
-                'duration'  => $duration,
+            Log::info("📦 Dispatching backup job (CLI)", array_merge($logContext, [
+                'database_name' => $db_name,
+                'backup_job'    => $backupJob->id
             ]));
 
+            // Dispatch the queued job
+            ProcessDatabaseBackup::dispatch($backupJob->id)->onQueue('backups');
+
+            $this->info("✅ Backup job queued successfully (Job ID: {$backupJob->id})");
             return Command::SUCCESS;
 
         } catch (BackupFailedException $e) {
