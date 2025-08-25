@@ -63,11 +63,12 @@ class BackupDatabase extends Command
                 }
                      
                 $db_name = $profiles[$profileName]['database'];
+
                 // Create backup job entry in DB
                 $backupJob = BackupJob::create([
                     'profile_name' => $profileName,
                     'status'       => 'pending',
-                    'mechanism'    => 'automated',
+                    'mechanism'    => 'manual',
                     'started_at'   => now()
                 ]);
 
@@ -84,13 +85,13 @@ class BackupDatabase extends Command
                     return Command::FAILURE;
                 }
 
-                $db_name = $connection->db_name;;
+                $db_name = $connection->db_name;
 
                 // Create backup job entry in DB
                 $backupJob = BackupJob::create([
                     'database_connection_id' => $id,
                     'status'                 => 'pending',
-                    'mechanism'              => 'automated',
+                    'mechanism'              => 'manual',
                     'started_at'             => now()
                 ]);
             }

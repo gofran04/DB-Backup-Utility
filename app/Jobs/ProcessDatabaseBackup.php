@@ -29,14 +29,14 @@ class ProcessDatabaseBackup implements ShouldQueue
     
     }
 
-    public function handle(): void
+    public function handle(DatabaseAdapterFactory $adapterFactory,CompressionServiceInterface $compressor,ConfigService $configService): void
     {
         $backupJob = BackupJob::findOrFail($this->backupJobId);
 
         try {
             BackupLoggerService::logStart($backupJob);
 
-            $adapterFactory = new DatabaseAdapterFactory();
+            $adapterFactory = app(DatabaseAdapterFactory::class);
             $compressor = app(CompressionServiceInterface::class);
 
             $path = config('backup.storage_path') . '/backups';
@@ -52,7 +52,7 @@ class ProcessDatabaseBackup implements ShouldQueue
 
             } elseif ($backupJob->profile_name) {
                 // Case: backup using profile
-                $configService = new ConfigService();
+                $configService = app(ConfigService::class);;
                 $profiles = $configService->loadProfiles();
                 $profile = $profiles[$backupJob->profile_name];
 
