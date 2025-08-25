@@ -15,6 +15,7 @@ use App\Exceptions\DatabaseConnectionException;
 use App\Exceptions\BackupFailedException;
 use App\Exceptions\CompresionFailedException;
 use App\Traits\ApiResponseTrait;
+use App\Services\ConfigService;
 
 class ProcessDatabaseBackup implements ShouldQueue
 {
@@ -31,30 +32,46 @@ class ProcessDatabaseBackup implements ShouldQueue
     public function handle(): void
     {
         $backupJob = BackupJob::findOrFail($this->backupJobId);
-        $dbConnection = DatabaseConnection::findOrFail($backupJob->database_connection_id);
 
-        try{
+        try {
             BackupLoggerService::logStart($backupJob);
 
             $adapterFactory = new DatabaseAdapterFactory();
-            $adapter = $adapterFactory->make($dbConnection);
-
             $compressor = app(CompressionServiceInterface::class);
-            $backupService = new DatabaseBackupService($adapter, $compressor);
 
             $path = config('backup.storage_path') . '/backups';
-            $backupResult = $backupService->backupUsingDbId($dbConnection, $path);
+            $backupResult = null;
 
-            $backupJob->update([
-                'status'       => 'completed',
-                'backup_path'  => $backupResult['relative_path'],
-                'file_size'    => $backupResult['file_size'],
-                'completed_at' => now()
-            ]);
+            if ($backupJob->database_connection_id) {
+                // Case: backup using db_id
+                $dbConnection = DatabaseConnection::findOrFail($backupJob->database_connection_id);
+                $adapter = $adapterFactory->make($dbConnection);
+                $backupService = new DatabaseBackupService($adapter, $compressor);
 
-            BackupLoggerService::logSuccess($backupJob, $backupResult['relative_path'], $backupResult['file_size']);
+                $backupResult = $backupService->backupUsingDbId($dbConnection, $path);
 
-        }catch (DatabaseConnectionException $e) {
+            } elseif ($backupJob->profile_name) {
+                // Case: backup using profile
+                $configService = new ConfigService();
+                $profiles = $configService->loadProfiles();
+                $profile = $profiles[$backupJob->profile_name];
+
+                $adapter = $adapterFactory->makeFromProfile($profile);
+                $backupService = new DatabaseBackupService($adapter, $compressor);
+
+                $backupResult = $backupService->backupUsingProfile($profile, $path);
+            }
+
+        $backupJob->update([
+            'status'       => 'completed',
+            'backup_path'  => $backupResult['relative_path'],
+            'file_size'    => $backupResult['file_size'],
+            'completed_at' => now()
+        ]);
+
+        BackupLoggerService::logSuccess($backupJob, $backupResult['relative_path'], $backupResult['file_size']);
+
+        } catch (DatabaseConnectionException $e) {
             $this->handleFailure($backupJob, $e, 'Database connection failed');
 
         } catch (BackupFailedException $e) {

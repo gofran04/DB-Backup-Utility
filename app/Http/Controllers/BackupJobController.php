@@ -8,9 +8,7 @@ use App\Http\Resources\BackupJobResource;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 use App\Traits\ApiResponseTrait;
-use App\Models\DatabaseConnection;
 use App\Jobs\ProcessDatabaseBackup;
-
 
 class BackupJobController extends Controller
 {
@@ -28,17 +26,20 @@ class BackupJobController extends Controller
     public function store(StoreBackupJobRequest $request)
     {
         $input = $request->validated();
+        $data = [
+        'status'     => 'pending',
+        'mechanism'  => 'manual',
+        'started_at' => now()
+        ];
 
-        $db_connection = DatabaseConnection::findOrFail($input['db_id']);
-
-        $backupJob = BackupJob::create([
-            'database_connection_id' => $input['db_id'],
-            'status'                 => 'pending',
-            'mechanism'              => 'manual',
-            'started_at'             => now()
-        ]);
+        if (isset($input['db_id'])) {
+            $data['database_connection_id'] = $input['db_id'];
+        }elseif (isset($input['db_profile'])) {
+            $data['profile_name'] = $input['db_profile'];
+        }
+       
+        $backupJob = BackupJob::create($data);
         
-        // Dispatch to queue
         ProcessDatabaseBackup::dispatch($backupJob->id)->onQueue('backups');
 
         return $this->successResponse(

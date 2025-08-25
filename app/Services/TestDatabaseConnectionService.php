@@ -89,7 +89,6 @@ class TestDatabaseConnectionService
             'password' => Crypt::decryptString($profile['password']),
             'prefix'   => '',
         ];
-                    \Illuminate\Support\Facades\Log::info("D: {$config['password']}");
 
         if ($driver === 'mysql') {
             $config += [

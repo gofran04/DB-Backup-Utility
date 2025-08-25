@@ -12,8 +12,7 @@ class BackupLoggerService
         // Log at the start of backup
         Log::info('Backup job started', [
             'backup_job_id'    => $job->id,
-            'db_connection_id' => $job->database_connection_id,
-            'db_name'          => $job->databaseConnection->db_name,
+            'db_name'          => self::getDbName($job),
         ]);
     }
 
@@ -31,10 +30,25 @@ class BackupLoggerService
     {
         Log::error('Backup job failed', [
             'backup_job_id'    => $job->id,
-            'db_connection_id' => $job->database_connection_id,
+            'db_name'          => self::getDbName($job),
             'error'            => $e->getMessage(),
             'duration'         => now()->diffInSeconds($job->started_at),
             'trace'            => $e->getTraceAsString(),
         ]);
+    }
+
+    private static function getDbName($job)
+    {
+        if ($job->database_connection_id) {
+            return $job->databaseConnection->db_name;
+        }
+
+        if ($job->profile_name) {
+            $configService = app(\App\Services\ConfigService::class);
+            $profiles = $configService->loadProfiles();
+            return $profiles[$job->profile_name]['database'];
+        }
+
+        return null;
     }
 }
