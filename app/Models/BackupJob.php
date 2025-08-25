@@ -13,6 +13,7 @@ class BackupJob extends Model
 
     protected $fillable = [
         'database_connection_id',
+        'profile_name',
         'backup_path',
         'status',
         'mechanism',

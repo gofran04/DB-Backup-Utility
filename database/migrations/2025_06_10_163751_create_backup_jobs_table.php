@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('backup_jobs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('database_connection_id')->constrained()->onDelete('cascade');
+            $table->foreignId('database_connection_id')->constrained()->onDelete('cascade')->nullable();
+            $table->string('profile_name')->nullable();
             $table->string('backup_path')->nullable();
             $table->enum('status', ['pending', 'running', 'completed', 'failed']);
             $table->enum('mechanism', ['manual', 'automated'])->default('manual');
