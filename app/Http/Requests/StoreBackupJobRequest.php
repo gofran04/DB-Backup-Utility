@@ -34,7 +34,8 @@ class StoreBackupJobRequest extends FormRequest
             $dbProfile = $this->input('db_profile');
 
             if (empty($this->db_profile) && empty($this->db_id)) {
-                $validator->errors()->add('id_profile', 'Either db_profile or db_id is required.');
+                $validator->errors()->add('db_id', 'Either db_profile or db_id is required.');
+                $validator->errors()->add('db_profile', 'Either db_profile or db_id is required.');
             }
 
             if (!empty($this->db_profile) && !empty($this->db_id)) {
