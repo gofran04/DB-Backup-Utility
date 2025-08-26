@@ -4,11 +4,8 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\BackupSchedule;
-use App\Services\DatabaseBackupService;
 use Cron\CronExpression;
 use Carbon\Carbon;
-use App\Factories\DatabaseAdapterFactory;
-use App\Services\Compression\CompressionServiceInterface;
 use App\Models\BackupJob;
 use App\Services\BackupLoggerService;
 use App\Exceptions\BackupFailedException;
@@ -16,6 +13,8 @@ use App\Exceptions\DatabaseConnectionException;
 use App\Exceptions\CompresionFailedException;
 use App\Notifications\ScheduledBackupFailed;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Log;
+use App\Jobs\ProcessDatabaseBackup;
 
 class RunScheduledBackups extends Command
 {
@@ -32,38 +31,31 @@ class RunScheduledBackups extends Command
             {
                 if ($this->isDue($schedule->cron_expression, $now)) 
                 {
-                    $backupJob = BackupJob::create([
-                        'database_connection_id' => $schedule->dbConnection->id,
-                        'status'                 => 'pending',
-                        'mechanism'              => 'automated',
-                        'started_at'             => now()
-                    ]);
+                    $backupJob = null;
 
-                    BackupLoggerService::logStart($backupJob);
-
-                    // Use factory to resolve correct adapter
-                    $adapter = (new DatabaseAdapterFactory())->make($schedule->dbConnection); 
-                    
-                    // get concrete implementation that was bound to this interface
-                    $compressor = app(CompressionServiceInterface::class);
-                    
-                    // Run backup
-                    $backupService = new DatabaseBackupService($adapter,$compressor);
-
-                    $this->info("Running backup for schedule ID: {$schedule->id}");
-                    try {
-                        $path = config('backup.storage_path') . '/backups';
-                        $result = $backupService->backupUsingDbId($schedule->dbConnection,$path); // assumes this method exists
-                        $backupJob->update([
-                            'status'       => 'completed',
-                            'backup_path'  => $result['relative_path'],
-                            'file_size'    => $result['file_size'],
-                            'completed_at' => now()
+                    if(!is_null($schedule->db_connection_id)){
+                        $backupJob = BackupJob::create([
+                            'database_connection_id' => $schedule->dbConnection->id,
+                            'status'                 => 'pending',
+                            'mechanism'              => 'automated',
+                            'started_at'             => now()
                         ]);
+                    }elseif(!is_null($schedule->profile_name)){
+                        $backupJob = BackupJob::create([
+                            'profile_name' => $schedule->profile_name,
+                            'status'       => 'pending',
+                            'mechanism'    => 'automated',
+                            'started_at'   => now()
+                        ]);
+                    }
 
-                        BackupLoggerService::logSuccess($backupJob, $result['relative_path'], $result['file_size']);
+                    try {
+                        Log::info("📦 Dispatching backup job (CLI), Job ID: ". $backupJob->id);
+        
+                        // Dispatch the queued job
+                        ProcessDatabaseBackup::dispatch($backupJob->id)->onQueue('backups');
 
-                        $this->info("✅ Backup completed for connection ID: {$schedule->dbConnection->id}");
+                        $this->info("✅ Backup job queued successfully (Job ID: {$backupJob->id})");
                     } catch (DatabaseConnectionException | BackupFailedException | CompresionFailedException $e) {
                         $backupJob->update([
                             'status'        => 'failed',
@@ -82,7 +74,7 @@ class RunScheduledBackups extends Command
             }
             return Command::SUCCESS;
         }else{
-            $this->info('There are no scheduled backups to run.');
+            $this->info('There Are No Scheduled Backups To Run.');
             return 0;
         }
     }
@@ -93,4 +85,3 @@ class RunScheduledBackups extends Command
         return $cron->isDue($now);
     }
 }
-
