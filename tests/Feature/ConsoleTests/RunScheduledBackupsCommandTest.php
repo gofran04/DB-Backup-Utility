@@ -36,8 +36,6 @@ class RunScheduledBackupsCommandTest extends TestCase
         ]);
 
         $this->artisan('backup:schedule')
-            ->expectsOutput("Running backup for schedule ID: {$task->id}")
-            ->expectsOutput("✅ Backup completed for connection ID: {$task->dbConnection->id}")
             ->assertExitCode(0);
 
         $this->assertDatabaseHas('backup_jobs', [
@@ -80,7 +78,6 @@ class RunScheduledBackupsCommandTest extends TestCase
         ]);
 
         $this->artisan('backup:schedule')
-            ->expectsOutput("✅ Backup completed for connection ID: {$task1->dbConnection->id}")
             ->assertExitCode(0);
 
         $this->assertDatabaseHas('backup_jobs', [

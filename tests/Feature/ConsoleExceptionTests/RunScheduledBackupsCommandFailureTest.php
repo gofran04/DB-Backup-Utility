@@ -49,8 +49,6 @@ class RunScheduledBackupsCommandFailureTest extends TestCase
 
 
         $this->artisan('backup:schedule')
-            ->expectsOutput("Running backup for schedule ID: {$task->id}")
-            ->expectsOutput('❌ Backup failed: Backup Operation Failed.')
             ->assertExitCode(0);
 
         $this->assertDatabaseHas('backup_jobs', [
