@@ -40,7 +40,8 @@ class RestoreBackupRequest extends FormRequest
             }
 
             if (!empty($this->db_profile) && !empty($this->db_id)) {
-                $validator->errors()->add('id_profile', 'Provide either db_profile or db_id, not both.');
+                $validator->errors()->add('db_id', 'Provide either db_profile or db_id, not both.');
+                $validator->errors()->add('db_profile', 'Provide either db_profile or db_id, not both.');
             }
 
             if (!empty($dbProfile)) {

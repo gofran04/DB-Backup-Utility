@@ -60,7 +60,7 @@ class RestoreDBTest extends TestCase
         $response = $this->postJson('api/restore',$data2);
         $response->assertOk();
         $response->assertJson([
-            'message' => 'Database restored successfully.',
+            'message' => 'Restore process started in background.',
         ]);
         $this->assertNotNull($fullPath, 'Backup path should not be null');
         $this->assertTrue(file_exists($fullPath), "Backup file does not exist: $fullPath");
@@ -106,7 +106,7 @@ class RestoreDBTest extends TestCase
         
         $response->assertOk();
         $response->assertJson([
-            'message' => 'Database restored successfully.',
+            'message' => 'Restore process started in background.',
         ]);
         $this->assertNotNull($fullPath, 'Backup path should not be null');
         $this->assertTrue(file_exists($fullPath), "Backup file does not exist: $fullPath");
@@ -125,9 +125,10 @@ class RestoreDBTest extends TestCase
         $response = $this->postJson('api/restore',$data2);
 
         $response->assertStatus(422); // Laravel returns 422 on validation failure
-        $response->assertJsonValidationErrors(['id_profile']);
+        $response->assertJsonValidationErrors(['db_id','db_profile']);
         $response->assertJsonFragment([
-            'id_profile' => ['Provide either db_profile or db_id, not both.']
+            'db_id'      => ['Provide either db_profile or db_id, not both.'],
+            'db_profile' => ['Provide either db_profile or db_id, not both.']
         ]);
     }
 
@@ -205,10 +206,10 @@ class RestoreDBTest extends TestCase
 
         $response = $this->postJson('api/restore', $data);
         
-        $response->assertStatus(404);
+        $response->assertStatus(422);
         $response->assertJsonFragment([
             'errors' => [
-                'message' => 'Profile: '. $data['db_profile']. ' not found',
+                'message' => 'Profile: '. $data['db_profile']. ' does not exist in config.json',
             ]
         ]);
     }
