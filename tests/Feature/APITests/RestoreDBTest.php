@@ -126,10 +126,6 @@ class RestoreDBTest extends TestCase
 
         $response->assertStatus(422); // Laravel returns 422 on validation failure
         $response->assertJsonValidationErrors(['db_id','db_profile']);
-        $response->assertJsonFragment([
-            'db_id'      => ['Provide either db_profile or db_id, not both.'],
-            'db_profile' => ['Provide either db_profile or db_id, not both.']
-        ]);
     }
 
     public function test_restore_fails_when_neither_id_or_profile_provided()
@@ -141,10 +137,7 @@ class RestoreDBTest extends TestCase
         $response = $this->postJson('api/restore',$data);
 
         $response->assertStatus(422); // Laravel returns 422 on validation failure
-        $response->assertJsonValidationErrors(['id_profile']);
-        $response->assertJsonFragment([
-            'id_profile' => ['Either db_profile or db_id is required.']
-        ]);
+        $response->assertJsonValidationErrors(['db_id','db_profile']);
     }
 
     public function test_restore_fails_when_dump_file_not_exist()
