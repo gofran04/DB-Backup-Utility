@@ -26,12 +26,21 @@ class BackupScheduleController extends Controller
         $validated = $request->validated();
         $cronExpression = ScheduleFrequency::OPTIONS[$validated['frequency']];
 
-        $schedule = BackupSchedule::create([
-            'db_connection_id' => $validated['db_connection_id'],
-            'frequency'        => $validated['frequency'],
-            'cron_expression'  => $cronExpression,
-            'enabled'          => $validated['enabled'] ?? true,
-        ]);
+        if($request->has('db_connection_id')){
+            $schedule = BackupSchedule::create([
+                'db_connection_id' => $validated['db_connection_id'],
+                'frequency'        => $validated['frequency'],
+                'cron_expression'  => $cronExpression,
+                'enabled'          => $validated['enabled'] ?? true,
+            ]);
+        }elseif($request->has('profile_name')){
+                $schedule = BackupSchedule::create([
+                'profile_name'     => $validated['profile_name'],
+                'frequency'        => $validated['frequency'],
+                'cron_expression'  => $cronExpression,
+                'enabled'          => $validated['enabled'] ?? true,
+            ]);
+        }
 
         return $this->successResponse(
             new BackupScheduleResource($schedule),
@@ -52,11 +61,21 @@ class BackupScheduleController extends Controller
         $validated = $request->validated();
         $cronExpression = ScheduleFrequency::OPTIONS[$validated['frequency']];
 
-        $backupSchedule->update([
-            'db_connection_id' => $validated['db_connection_id'],
-            'frequency'        => $validated['frequency'],
-            'cron_expression'  => $cronExpression,
-        ]);
+        if($request->has('db_connection_id')){
+            $backupSchedule->update([
+                'db_connection_id' => $validated['db_connection_id'],
+                'profile_name'     => null,
+                'frequency'        => $validated['frequency'],
+                'cron_expression'  => $cronExpression,
+            ]);
+        }elseif($request->has('profile_name')){
+                $backupSchedule->update([
+                'db_connection_id' => null,
+                'profile_name'     => $validated['profile_name'],
+                'frequency'        => $validated['frequency'],
+                'cron_expression'  => $cronExpression,
+            ]);
+        }
 
         return $this->successResponse(
             new BackupScheduleResource($backupSchedule->refresh()),
