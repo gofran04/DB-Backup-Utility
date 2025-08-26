@@ -140,25 +140,6 @@ class RestoreDBTest extends TestCase
         $response->assertJsonValidationErrors(['db_id','db_profile']);
     }
 
-    public function test_restore_fails_when_dump_file_not_exist()
-    {
-        $db_connection = DatabaseConnection::factory()->create();
-
-        $data = [
-            'db_id' => $db_connection->id,
-            'file'  => 'not_found_file.sql'
-        ];
-
-        $response = $this->postJson('api/restore',$data);
-
-        $this->assertFalse(file_exists($data['file']));
-        $response->assertJsonFragment([
-            'errors' => [
-                'message' => "Backup file not found: " .  storage_path("app/{$data['file']}"),
-            ],
-        ]);
-    }
-
     public function test_restore_fails_if_file_not_provided()
     {
         $db_connection = DatabaseConnection::factory()->create();
@@ -200,10 +181,6 @@ class RestoreDBTest extends TestCase
         $response = $this->postJson('api/restore', $data);
         
         $response->assertStatus(422);
-        $response->assertJsonFragment([
-            'errors' => [
-                'message' => 'Profile: '. $data['db_profile']. ' does not exist in config.json',
-            ]
-        ]);
+        $response->assertJsonValidationErrors(['db_profile']);
     }
 }

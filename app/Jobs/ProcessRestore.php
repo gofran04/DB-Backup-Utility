@@ -69,26 +69,25 @@ class ProcessRestore implements ShouldQueue
 
             Log::info('✅ Restore completed successfully', ['file' => $filePath]);
 
-        } catch (Throwable $e) {
+        } catch (\Exception $e) {
             $this->handleFailure($e);
-            throw $e; // Re-throw so Laravel marks job as failed
         }
     }
 
-    protected function handleFailure(Throwable $e): void
+    protected function handleFailure($e)
     {
         Log::error('❌ Restore job failed', [
             'message' => $e->getMessage(),
             'type'    => $e instanceof RestoreFailedException ? $e->getType() : 'unknown',
             'trace'   => $e->getTraceAsString()
         ]);
+
+        throw $e; 
     }
 
     public function failed(Throwable $e): void
     {
         // Called by Laravel when job exhausts all attempts
-        Log::critical('💥 Restore job permanently failed after retries', [
-            'error' => $e->getMessage()
-        ]);
+        Log::error("Restore job permanently failed after retries");
     }
 }

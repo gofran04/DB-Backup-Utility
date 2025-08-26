@@ -95,7 +95,6 @@ class ProcessDatabaseBackup implements ShouldQueue
         ]);
 
         BackupLoggerService::logFailure($backupJob, $e);
-        Log::error("{$context}: " . $e->getMessage());
         throw $e; // Trigger retry/failure in Laravel
     }
 
