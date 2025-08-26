@@ -73,7 +73,7 @@ class RestoreDatabaseCommandTest extends TestCase
             '--id' => $dbConnection->id,
             ])
             ->expectsOutput("🔍 Loading DB config from database_connections table (ID: $dbConnection->id)")
-            ->expectsOutput("✅ Restore complete.")
+            ->expectsOutput("✅ Restore job queued successfully")
             ->assertExitCode(0);
 
         $this->assertFileExists($fullPath);
@@ -106,7 +106,7 @@ class RestoreDatabaseCommandTest extends TestCase
             '--profile' => 'temp_profile',
             ])
             ->expectsOutput("🔍 Loading DB config from profile: temp_profile")
-            ->expectsOutput("✅ Restore complete.")
+            ->expectsOutput("✅ Restore job queued successfully")
             ->assertExitCode(0);
 
         $this->assertFileExists($fullPath);
@@ -169,7 +169,7 @@ class RestoreDatabaseCommandTest extends TestCase
             '--id' => $dbConnection->id,
             ])
             ->expectsOutput("🔍 Loading DB config from database_connections table (ID: $dbConnection->id)")
-            ->expectsOutput("✅ Restore complete.")
+            ->expectsOutput("✅ Restore job queued successfully")
             ->assertExitCode(0);
 
         $this->assertFileExists($fullPath.'.gz');
