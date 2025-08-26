@@ -12,6 +12,7 @@ class BackupSchedule extends Model
 
     protected $fillable = [
         'db_connection_id',
+        'profile_name',
         'frequency',
         'cron_expression',
         'enabled',

@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('backup_schedules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('db_connection_id')->constrained('database_connections')->onDelete('cascade');                        
+            $table->foreignId('db_connection_id')->nullable()->constrained('database_connections')->onDelete('cascade');                        
+            $table->string('profile_name')->nullable();
             $table->string('frequency')->nullable();            
             $table->string('cron_expression');// Cron expression like "0 2 * * *"
             $table->boolean('enabled')->default(true);
