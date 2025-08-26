@@ -34,21 +34,21 @@ class RestoreDatabaseBackup extends Command
             return Command::INVALID;
         }
 
-        // ✅ Resolve file path
-        $resolvedPath = $this->resolveFilePath($file);
-        if (!$resolvedPath) {
+        // ✅ Validate file existence (using resolved path)
+        if (!$this->resolveFilePath($file)) {
             $this->error("❌ Backup file not found: $file");
             return Command::FAILURE;
         }
 
         try {
             $logContext = [
-                'source' => 'CLI',
+                'source'     => 'CLI',
                 'invoked_at' => now()->toDateTimeString(),
-                'file' => $file
+                'file'       => $file
             ];
 
-            $validated = ['file' => $resolvedPath];
+            // ✅ Keep original relative path (like API does)
+            $validated = ['file' => $file];
 
             if ($profile) {
                 $logContext['profile'] = $profile;
@@ -77,7 +77,6 @@ class RestoreDatabaseBackup extends Command
                     return Command::FAILURE;
                 }
                 $validated['db_id'] = $id;
-
             }
 
             Log::info("📦 Dispatching restore job (CLI)", $logContext);
