@@ -11,11 +11,12 @@ use App\Services\Compression\DecompressionServiceInterface;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use App\Traits\ApiResponseTrait;
 use Throwable;
 
 class ProcessRestore implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, ApiResponseTrait;
 
     public $timeout = 1200; // 20 minutes
     public $tries = 2;
@@ -51,6 +52,13 @@ class ProcessRestore implements ShouldQueue
                 $profile = $configService->getProfile($profileName);
                 if (!$profile) {
                     throw new RestoreFailedException("Profile not found: {$profileName}", 'profile_missing');
+                }
+                if (!$profile) {
+                 return $this->errorResponse(
+                    'Restore DB failed',
+                    [
+                        'message' => 'Profile: '. $profileName. ' not found',
+                    ],404);
                 }
                 $adapter = $adapterFactory->makeFromProfile($profile);
             }

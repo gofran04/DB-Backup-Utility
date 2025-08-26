@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Services\ConfigService;
 
 class RestoreBackupRequest extends FormRequest
 {
@@ -31,12 +32,24 @@ class RestoreBackupRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
+            $dbProfile = $this->input('db_profile');
+
             if (empty($this->db_profile) && empty($this->db_id)) {
-                $validator->errors()->add('id_profile', 'Either db_profile or db_id is required.');
+                $validator->errors()->add('db_id', 'Either db_profile or db_id is required.');
+                $validator->errors()->add('db_profile', 'Either db_profile or db_id is required.');
             }
 
             if (!empty($this->db_profile) && !empty($this->db_id)) {
                 $validator->errors()->add('id_profile', 'Provide either db_profile or db_id, not both.');
+            }
+
+            if (!empty($dbProfile)) {
+                $configService = app(ConfigService::class);
+                $profiles = $configService->loadProfiles();
+
+                if (!isset($profiles[$dbProfile])) {
+                    $validator->errors()->add('db_profile', "Profile '{$dbProfile}' does not exist in config.json.");
+                }
             }
         });
     }
